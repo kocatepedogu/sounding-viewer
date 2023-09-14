@@ -1,0 +1,179 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Document */
+
+body {
+  overflow-x: scroll;
+  white-space: nowrap;
+  padding:0px;
+  margin:0px;
+  font-size:small;
+}
+
+#title {
+  width: 100%;
+  background-color: rgb(108, 165, 184);
+  color: white;
+  height: 50px;
+  padding-top: 5px;
+  padding-left: 20px;
+}
+
+#main-div {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+table tbody tr {
+  background-color: rgb(250, 250, 250);
+}
+
+table tbody tr:hover {
+  background-color: rgb(175, 175, 175);
+}
+
+/* Sounding Table */
+
+#sounding-table-container {
+  display: inline-block;
+  vertical-align: top;
+  box-shadow:0 0 6px #888888;
+  width: 320px;
+}
+
+#sounding-table tbody {
+  display: block;
+  width: 100%;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  /*overflow: auto;
+  height: 600px;*/
+}
+
+#sounding-table thead tr {
+  display: block;
+  width: 100%;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+#sounding-table thead {
+  background: rgb(53, 94, 0);
+  color: white;
+  /*height: 30px;*/
+}
+
+#sounding-table td {
+  padding: 0px;
+  text-align: center;
+  width: 50px;
+}
+
+/* Sounding Table Context Menu */
+
+#sounding-table-menu {
+  background-color: rgb(249, 249, 249);
+  position:fixed;
+  z-index: 1;
+  visibility: hidden;
+  border: solid;
+  border-radius: 2px;
+  border-width: 1px;
+  list-style: none;
+  padding: 5px;
+}
+
+#sounding-table-menu li:hover {
+  background-color: gray;
+}
+
+/* Sounding Diagram */
+
+#sounding-diagram-container {
+  margin-left: 20px;
+  display: inline-block;
+  vertical-align: top;
+  white-space: normal;
+  box-shadow:0 0 6px #888888;
+}
+
+#sounding-diagram {
+  padding: 0px;
+  margin: 0px;
+  padding-top: 20px;
+}
+
+#sounding-diagram-settings {
+  padding-left: 15px;
+  padding-bottom: 15px;
+  font-size: small;
+}
+
+#sounding-diagram-settings input[type=number] {
+  width: 50px;
+}
+
+#sounding-error {
+  color: red;
+}
+
+/* Right panel */
+
+#sounding-right-panel {
+  vertical-align: top;
+  display: inline-block;
+  padding-left: 20px;
+  white-space: normal;
+  width: 240px;
+  height: 300px;
+}
+
+/* Sounding function list */
+
+.feature-list {
+  box-shadow:0 0 6px #888888;
+  margin-bottom: 20px;
+}
+
+.feature-list-title {
+  width: 100%;
+  margin: 0px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  height: 20px;
+  background-color: rgb(53, 94, 0);
+  color: white;
+  text-align: center;
+}
+
+.feature-list-body {
+  width: 100%;
+}
+
+.feature-list-body ul {
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  height: 100%;
+}
+
+/* Sounding Indices */
+
+#sounding-indices-container {
+  box-shadow:0 0 6px #888888;
+}
+
+#sounding-indices {
+  width: 100%;
+}
+
+#sounding-indices thead {
+  background: rgb(53, 94, 0);
+  color: white;
+}
+
+#sounding-indices td {
+  padding: 5px;
+  padding-left: 8px;
+}

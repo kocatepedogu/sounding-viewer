@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "strict": true,
+    "moduleDetection": "force",
+    "module": "ES2022",
+    "sourceMap": true
+  }
+}

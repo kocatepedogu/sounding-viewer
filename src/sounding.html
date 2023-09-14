@@ -1,0 +1,49 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!DOCTYPE html>
+
+<head>
+  <title>Sounding</title>
+  <link rel="stylesheet" href="sounding.css">
+</head>
+
+<body>
+  <div id="title">
+    <a href="index.html">Return to data selection page</a>
+  </div>
+  <div id="main-div">
+    <div id="sounding-table-container">
+      <table id="sounding-table"></table>
+    </div>
+    <div id="sounding-diagram-container">
+      <canvas id="sounding-diagram" width="500px" height="600px"></canvas>
+      <div id="sounding-diagram-settings">
+        <p><label id="sounding-error"></label></p>
+        <label>Skew: <input id="skew-input" type="number"></label>
+        <label>Tstep: <input id="tstep-input" type="number" min="1"></label>
+        <label>Tmin: <input id="tmin-input" type="number" disabled></label>
+        <label>Tmax: <input id="tmax-input" type="number" disabled></label>
+        <label><input type="checkbox" id="check-automatic-limits" checked>Automatic</label>
+      </div>
+    </div>
+    <div id="sounding-right-panel">
+      <div class="feature-list">
+        <div class="feature-list-title">Functions</div>
+        <div class="feature-list-body"><ul id="sounding-function-list-ul"></ul></div>
+      </div>
+      <div class="feature-list">
+        <div class="feature-list-title">Curves</div>
+        <div class="feature-list-body"><ul id="sounding-curve-list-ul"></ul></div>
+      </div>
+      <div id="sounding-indices-container">
+        <table id="sounding-indices"></table>
+      </div>
+    </div>
+
+    <ul id="sounding-table-menu">
+      <li id="sounding-table-menu-insert-below">Insert below</li>
+      <li id="sounding-table-menu-insert-above">Insert above</li>
+      <li id="sounding-table-menu-delete">Delete</li>
+    </ul>
+  </div>
+  <script src="./sounding.js" type="module"></script>
+</body>

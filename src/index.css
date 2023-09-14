@@ -1,0 +1,41 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+
+body {
+  white-space: nowrap;
+  padding:0px;
+  margin:0px;
+}
+
+ul {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+li {
+  padding-bottom: 10px;
+}
+
+#title {
+  width: 100%;
+  background-color: rgb(108, 165, 184);
+  color: white;
+  height: 50px;
+  padding-top: 5px;
+}
+
+#main-div {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+#form-div {
+  width: 300px;
+  padding-right: 10px;
+}
+
+#map-div {
+  width: 500px; 
+  height: 500px;
+}
