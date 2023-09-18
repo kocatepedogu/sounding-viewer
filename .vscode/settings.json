@@ -5,7 +5,7 @@
   "files.exclude": {
     "**/*.js": { "when": "$(basename).ts" },
     "**/**.js": { "when": "$(basename).tsx" },
-    "**/*.js.map": true
+    "**/*.js.map": true,
   },
 
   "editor.codeActionsOnSave": {

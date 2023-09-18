@@ -2,20 +2,18 @@
 <!DOCTYPE html>
 
 <head>
-  <title>Sounding</title>
+  <title>Sounding Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="sounding.css">
 </head>
 
 <body>
-  <div id="title">
-    <a href="index.html">Return to data selection page</a>
-  </div>
+  <div id="loading-div">Loading</div>
   <div id="main-div">
-    <div id="sounding-table-container">
-      <table id="sounding-table"></table>
-    </div>
+    <div id="sounding-table"></div>
     <div id="sounding-diagram-container">
-      <canvas id="sounding-diagram" width="500px" height="600px"></canvas>
+      <div id="sounding-diagram-title">[Model]</div>
+      <canvas id="sounding-diagram" width="500" height="600px"></canvas>
       <div id="sounding-diagram-settings">
         <p><label id="sounding-error"></label></p>
         <label>Skew: <input id="skew-input" type="number"></label>
@@ -34,16 +32,16 @@
         <div class="feature-list-title">Curves</div>
         <div class="feature-list-body"><ul id="sounding-curve-list-ul"></ul></div>
       </div>
-      <div id="sounding-indices-container">
-        <table id="sounding-indices"></table>
-      </div>
+      <div id="sounding-indices-title">Indices</div>
+      <div id="sounding-indices-body"></div>
     </div>
-
-    <ul id="sounding-table-menu">
-      <li id="sounding-table-menu-insert-below">Insert below</li>
-      <li id="sounding-table-menu-insert-above">Insert above</li>
-      <li id="sounding-table-menu-delete">Delete</li>
-    </ul>
   </div>
-  <script src="./sounding.js" type="module"></script>
+
+  <ul id="sounding-table-menu">
+    <li id="sounding-table-menu-insert-below">Insert below</li>
+    <li id="sounding-table-menu-insert-above">Insert above</li>
+    <li id="sounding-table-menu-delete">Delete</li>
+  </ul>
+  <script src="./bundle.js"></script>
+  <script>window.initializeSounding();</script>
 </body>

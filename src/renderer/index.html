@@ -1,0 +1,26 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!DOCTYPE html>
+<head>
+  <title>Sounding Viewer</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div id="form-div">
+    <br>
+    <form method="GET" action="./sounding.html">
+      <ul id="options">
+        <li>
+          <label for="srcselector">Source</label>
+          <select id="srcselector" name="src">
+            <option value="rucsoundings">rucsoundings.noaa</option>
+            <option value="nomads">nomads.ncep.noaa</option>
+          </select>
+        </li>
+      </ul>
+      <button type="submit">Load</button>
+    </form>
+  </div>
+  <div id="map-div"></div>
+  <script src="./bundle.js"></script>
+  <script>window.initializeMapAndOptions();</script>
+</body>

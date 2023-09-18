@@ -1,5 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+/**
+ * @param u-component of wind
+ * @param v-component of wind
+ * @returns Wind direction in degrees
+ */
+export function windDirection(u:number, v:number): number {
+  const dir = Math.atan2(v, u) * 180 / Math.PI;
+  if (dir < 0) {
+    return dir + 360;
+  } else {
+    return dir;
+  }
+}
+
+/**
+ * @param u-component of wind
+ * @param v-component of wind
+ * @returns Wind speed (in the same unit as arguments)
+ */
+export function windSpeed(u:number, v:number): number {
+  return Math.sqrt(u**2 + v**2);
+}
+
 /** 
   @param Td Dewpoint temperature in Celsius
   @returns Vapor pressure in mb/hPa
@@ -55,6 +78,18 @@ export function relativeHumidity(T: number, Td: number, Psta: number): number {
   const w = mixingRatio(Td, Psta);
   const ws = saturatedMixingRatio(T, Psta);
   return w/ws;
+}
+
+/**
+ * @param T Temperature in Celsius
+ * @param RH Relative Humidity (a unitless value between 0 and 1)
+ * @returns Dewpoint temperature in Celsius
+ */
+export function dewpointTemperature(T: number, RH: number): number {
+  const es = saturatedVaporPressure(T);
+  const A = 237.3 * Math.log(es * RH / 6.11);
+  const B = 7.5 * Math.log(10) - Math.log(es * RH / 6.11);
+  return A / B;
 }
 
 /**

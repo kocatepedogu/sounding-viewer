@@ -1,8 +1,7 @@
 {
-  "name": "sounding-visualizer",
+  "name": "sounding-viewer",
   "version": "1.0.0",
-  "type": "module",
-  "main": "index.cjs",
+  "main": "./src/main/bundle.js",
   "authors": "Dogu",
   "description": "Computes instability indices and plots diagrams from sounding data",
   "license": "GPL-3.0-or-later",
@@ -10,7 +9,6 @@
     "@electron-forge/cli": "^6.4.2",
     "@electron-forge/maker-deb": "^6.4.2",
     "@electron-forge/maker-rpm": "^6.4.2",
-    "@electron-forge/maker-squirrel": "^6.4.2",
     "@electron-forge/maker-wix": "^6.4.2",
     "@electron-forge/maker-zip": "^6.4.2",
     "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
@@ -20,13 +18,19 @@
     "electron-wix-msi": "^5.0.0",
     "eslint": "^8.48.0",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "ol": "^8.1.0",
+    "source-map-loader": "^1.0.0"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
+    "ftp": "^0.3.10",
     "ol": "^8.1.0"
   },
   "scripts": {
+    "build": "webpack --config webpack.config.cjs",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"

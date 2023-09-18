@@ -1,0 +1,216 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Document */
+
+:root {
+  --dark: rgb(78, 78, 78);
+  --light-gray: rgb(236, 236, 236);
+  --title-height: 25px;
+  --table-color: var(--light-gray);
+  --table-hover-color:  rgb(175, 175, 175);
+}
+
+@font-face {
+  font-family: liberation;
+  src: url('../../resources/LiberationSans-Regular.ttf');
+}
+
+html, body {
+  padding:0px;
+  margin:0px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  font-size: 10pt;
+  align-items: stretch;
+  font-family: liberation;
+}
+
+#loading-div {
+  width: 150px;
+  height: 40px;
+  padding: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 18pt;
+  color: white;
+  visibility: visible;
+  background-color: rgb(0, 106, 148);
+}
+
+#main-div {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  visibility: hidden;
+}
+
+/* Sounding Table */
+
+#sounding-table {
+  height: 100vh;
+  background-color: var(--table-color);
+}
+
+#sounding-table-title {
+  background: var(--dark);
+  color: white;
+  height: var(--title-height);
+  white-space: nowrap;
+}
+
+#sounding-table-body {
+  display: block;
+  overflow: auto;
+  overflow-x: hidden;
+  width: 100%;
+  height: calc(100% - var(--title-height));
+}
+
+.sounding-table-data-rows {
+  white-space: nowrap;
+  height: 3.5vh;
+  min-height: 20px;
+  max-height: 27px;
+}
+
+.sounding-table-data-rows:hover {
+  white-space: nowrap;
+  height: 3.5vh;
+  min-height: 20px;
+  background-color: var(--table-hover-color);
+}
+
+.sounding-table-title-column, .sounding-table-data-cells, .sounding-table-check-cells {
+  display: inline-block;
+  width: 3vw;
+  min-width: 40px;
+}
+
+#sounding-table input[type=checkbox] {
+  accent-color: gray;
+}
+
+#sounding-table input[type=text] {
+  display: inline-flex;
+  position:relative;
+}
+
+/* Sounding Table Context Menu */
+
+#sounding-table-menu {
+  background-color: rgb(249, 249, 249);
+  position:fixed;
+  z-index: 1;
+  visibility: hidden;
+  border: solid;
+  border-radius: 2px;
+  border-width: 1px;
+  list-style: none;
+  padding: 5px;
+}
+
+#sounding-table-menu li:hover {
+  background-color: gray;
+}
+
+/* Sounding Diagram */
+
+#sounding-diagram-title {
+  width: 100%;
+  background-color: var(--dark);
+  height: var(--title-height);
+  text-align: center;
+  color: white;
+}
+
+#sounding-diagram-container {
+  float: left;
+  white-space: normal;
+  width: 60vw;
+  height: 100vh;
+  text-align: center;
+}
+
+#sounding-diagram-settings input[type=number] {
+  width: 50px;
+}
+
+#sounding-error {
+  color: red;
+}
+
+/* Right panel */
+
+#sounding-right-panel {
+  vertical-align: top;
+  display: flex;
+  flex-flow: column;
+  white-space: normal;
+  width: 19vw;
+  min-width: 240px;
+  height: 100vh;
+}
+
+/* Sounding function list */
+.feature-list {
+  box-shadow:0 0 6px #888888;
+  flex: 0 1 auto;
+  padding-bottom: 20px;
+}
+
+.feature-list-title {
+  width: 100%;
+  height: var(--title-height);
+  background-color: var(--dark);
+  color: white;
+  text-align: center;
+}
+
+.feature-list-body ul {
+  margin: 0;
+  padding: 0px;
+  list-style: none;
+  height: 100%;
+}
+
+/* Sounding Indices */
+#sounding-indices-title {
+  flex: 0 1 auto;
+  background: var(--dark);
+  color: white;
+  height: var(--title-height);
+  text-align: center;
+  box-shadow:-3px 0px 6px #888888
+}
+
+#sounding-indices-body {
+  flex: 1 1 auto;
+  display: block;
+  overflow: auto;
+  height: calc(100% - var(--title-height));
+  box-shadow:0 0 6px #888888;
+}
+
+.sounding-indices-row {
+  white-space: nowrap;
+  padding: 5px;
+}
+
+.sounding-indices-row:hover {
+  background-color: var(--table-hover-color);
+}
+
+.sounding-indices-name-column {
+  display: inline-block;
+  width: 80%;
+}
+
+.sounding-indices-value-column {
+  display: inline-block;
+  width: 20%;
+}
+

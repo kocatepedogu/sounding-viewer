@@ -1,4 +1,9 @@
 node_modules
+wgrib2
+src/renderer/types
 out/
 *.js
 *.js.map
+*.tsbuildinfo
+*.grib2
+*.csv

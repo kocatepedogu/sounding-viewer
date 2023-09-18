@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import * as data from "./sounding-data.js"
+import * as data from "./data"
 
 export class SoundingTable {
   /* Level properties that will be displayed together with their titles */
   private readonly levelProperties = ["pressure", "height", "temp", "dewpt", "windspd", "winddir"];
   private readonly levelPropertyTitles = [
-    "P (mb)",
-    "Z (m)",
-    "T (C)",
-    "Td (C)",
-    "Spd (km/s)",
+    "P",
+    "Z",
+    "T",
+    "Td",
+    "Spd",
     "Dir"
   ];
 
   /* Currently edited cell */
-  private lastEdited: HTMLTableCellElement | undefined = undefined;
+  private lastEdited: HTMLDivElement | undefined = undefined;
 
   /* Closes currently edited cell */
   private closeInputBox() {
@@ -49,14 +49,14 @@ export class SoundingTable {
   /* Generates HTML code for single a row */
   private generateRowCode(level: data.Level) {
     let newRow = 
-      `<tr class="sounding-table-data-rows" id="${level.id}">
-      <td><input type="checkbox" id="check-${level.id}" ${level.enabled ? "checked" : ""}/></td>`;
+      `<div class="sounding-table-data-rows" id="${level.id}">
+         <div class="sounding-table-check-cells"><input type="checkbox" id="check-${level.id}" ${level.enabled ? "checked" : ""}/></div>`;
 
     this.levelProperties.forEach(prop => { 
-      newRow += `<td class="sounding-table-data-cells" id="${level.id + '-' + prop}">${level[prop]}</td>`; 
+      newRow += `<div class="sounding-table-data-cells" id="${level.id + '-' + prop}">${level[prop]}</div>`; 
     });
 
-    return newRow + `</tr>`;
+    return newRow + `</div>`;
   }
 
   private tableLeftClickHandler(event: MouseEvent, sounding: data.Sounding) {
@@ -64,7 +64,7 @@ export class SoundingTable {
 
     const targetElement = event.target as HTMLElement;
     
-    if (targetElement instanceof HTMLTableCellElement && targetElement.className == "sounding-table-data-cells") {
+    if (targetElement instanceof HTMLDivElement && targetElement.className == "sounding-table-data-cells") {
       const target = targetElement.id.split('-');
       const targetLevel = parseInt(target[0])
       const targetParameter = target[1];
@@ -118,7 +118,7 @@ export class SoundingTable {
     const targetPosition = targetElement.id.split('-');
     const newChoosenLevel = targetPosition[0];
 
-    if (targetElement instanceof HTMLTableCellElement) {
+    if (targetElement instanceof HTMLDivElement) {
       /* Make context menu visible */
       this.contextMenu.style.top = `${event.y}px`;
       this.contextMenu.style.left = `${event.x}px`;
@@ -130,6 +130,7 @@ export class SoundingTable {
       this.choosenLevel = parseInt(newChoosenLevel);
 
       event.preventDefault();
+      event.stopPropagation();
     }
   }
 
@@ -168,17 +169,17 @@ export class SoundingTable {
     }
 
     /* Display header of the table */
-    let tableHead = '<thead><tr id="sounding-table-title"><td class="sounding-table-title-column"></td>';
-    this.levelPropertyTitles.forEach((title) => {tableHead += `<td class="sounding-table-title-column">${title}</td>`});
-    tableHead += "</tr></thead>";
+    let tableHead = '<div id="sounding-table-title"><div class="sounding-table-title-column"></div>';
+    this.levelPropertyTitles.forEach((title) => {tableHead += `<div class="sounding-table-title-column">${title}</div>`});
+    tableHead += "</div>";
 
     /* Display levels */
-    let tableBody = '<tbody>'
+    let tableBody = '<div id="sounding-table-body">';
     for (const level of sounding.levels) {
       tableBody += this.generateRowCode(level);
     }
 
-    soundingTable.innerHTML = tableHead + tableBody + "</tbody>";
+    soundingTable.innerHTML = tableHead + tableBody + '</div>';
 
     /* Event handlers of context menu */
     this.contextMenu.addEventListener('click', (event) => {this.contextMenuClickHandler(event, sounding);});

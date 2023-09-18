@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import * as data from "./sounding-data.js"
-import * as numerical from "./sounding-numerical.js"
+import * as data from "./data"
+import * as numerical from "./numerical"
 
 interface PlotFeature {
   /** Color of the line */
@@ -406,10 +406,10 @@ export class SoundingPlot {
   private plot() {
     // There must be at least two distinct levels for drawing a Skew-T diagram.
     if (!this.sounding.first() || !this.sounding.last()) {
-      return false;
+      return;
     }
     if (this.sounding.first() == this.sounding.last()) {
-      return false;
+      return;
     }
 
     /* Find limits and boundaries */

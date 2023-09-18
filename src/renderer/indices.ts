@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-import * as data from "./sounding-data.js"
-import * as numerical from "./sounding-numerical.js"
+import * as data from "./data"
+import * as numerical from "./numerical"
 
 type SoundingIndex = {
   /** func takes the sounding as argument and returns an index value */
@@ -81,48 +81,26 @@ export class IndexTable {
 
   /* Computes and prints indices */
   printIndices() {
-      const indicesDiv = document.getElementById('sounding-indices')!;
+    const indicesDiv = document.getElementById('sounding-indices-body')!;
+    indicesDiv.replaceChildren();
 
-      const titleName = document.createElement('td');
-      titleName.innerText = "Index";
-      titleName.className = "indexNameColumn";
+    for (const index of this.indices) {
+      const name = document.createElement("div");
+      name.innerText = index.name;
+      name.className = "sounding-indices-name-column";
 
-      const titleValue = document.createElement('td');
-      titleValue.innerText = "Value";
-      titleName.className = "indexValueColumn";
+      const value = document.createElement("div");
+      try { value.innerText = index.func(this.sounding).toFixed(2); } 
+      catch { value.innerText = "Undefined"; }
+      value.className = "sounding-indices-value-column";
 
-      const titleRow = document.createElement('tr');
-      titleRow.appendChild(titleName);
-      titleRow.appendChild(titleValue);
-
-      const thead = document.createElement('thead');
-      thead.appendChild(titleRow);
-  
-      const tbody = document.createElement("tbody");
-      for (const index of this.indices) {
-        const name = document.createElement("td");
-        name.innerText = index.name;
-        name.className = "indexNameColumn";
-
-        const value = document.createElement("td");
-
-        try {
-          value.innerText = index.func(this.sounding).toFixed(2);
-        } catch {
-          value.innerText = "Undefined";
-        }
-
-        value.className = "indexValueColumn";
-
-        const row = document.createElement("tr");
-        row.appendChild(name);
-        row.appendChild(value);
-
-        tbody.appendChild(row);
-      }
-
-      indicesDiv.replaceChildren(tbody, thead);
+      const row = document.createElement("div");
+      row.className = "sounding-indices-row";
+      row.appendChild(name);
+      row.appendChild(value);
+      indicesDiv.appendChild(row);
     }
+  }
 
   update() {
     this.printIndices();
