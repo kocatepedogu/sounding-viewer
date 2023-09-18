@@ -2,8 +2,8 @@
 
 An open source sounding viewer and editor. The application provides a simple interface to download and plot GFS soundings from rucsoundings.noaa.gov and nomads.ncep.noaa.gov. It prints data as a table, draws Skew-T log-P diagrams, and shows computed instability indices.
 
-<img src="./resources/map.png" align="left" width="240" >
-<img src="./resources/app.png" align="left" width="240" >\\
+<img src="./resources/map.png" width="240">
+<img src="./resources/app.png" width="240">
 
 Features:
 + All values in the sounding table are modifiable. Changes are immediately reflected in the diagram and in the indices panel.
