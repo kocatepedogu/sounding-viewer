@@ -5,11 +5,11 @@ An open source sounding viewer and editor. The application provides a simple int
 ![map](./resources/app2.png) ![map](./resources/app.png)
 
 Features:
-+All values in the sounding table are modifiable. Changes are immediately reflected in the diagram and in the indices panel.
-+It is possible to exclude any particular pressure level from the sounding. The lowest included level is used as the surface level for computing parcel temperatures and indices such as CAPE and Lifted Index.
-+Pressure levels in the table can be deleted, or new pressure levels can be created. When a new pressure level is added, its values are determined by linear interpolation or linear extrapolation, but these values can also be modified by the user.
-+Skewness and temperature limits of the Skew-T diagram can be set by the user.
-+The curves and functions to be drawn are determined using checkbox lists.
++ All values in the sounding table are modifiable. Changes are immediately reflected in the diagram and in the indices panel.
++ It is possible to exclude any particular pressure level from the sounding. The lowest included level is used as the surface level for computing parcel temperatures and indices such as CAPE and Lifted Index.
++ Pressure levels in the table can be deleted, or new pressure levels can be created. When a new pressure level is added, its values are determined by linear interpolation or linear extrapolation, but these values can also be modified by the user.
++ Skewness and temperature limits of the Skew-T diagram can be set by the user.
++ The curves and functions to be drawn are determined using checkbox lists.
 
 ## Dependencies
 
