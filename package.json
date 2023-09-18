@@ -28,11 +28,12 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "ftp": "^0.3.10",
+    "basic-ftp": "^5.0.3",
     "ol": "^8.1.0"
   },
   "scripts": {
     "build": "webpack --config webpack.config.cjs",
+    "run": "electron --trace-deprecation .",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"

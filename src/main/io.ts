@@ -21,8 +21,8 @@
 import { exec } from 'child_process';
 import fs = require('fs');
 import path = require('path');
-import Client = require('ftp');
 import https = require('https');
+import ftp = require("basic-ftp");
 
 let appDataDir: string;
 
@@ -72,26 +72,20 @@ export function initializeAppData() {
 export function getFileListFromFTP(host: string, directory: string) {
   const errorMessage = 'Cannot get file list from FTP server ' + host + "/" + directory;
   return new Promise<string[]|Error>((resolve) => {
+    const client = new ftp.Client();
     try {
-      const client = new Client();
-      client.on('ready', () => {
-        client.list(directory, function(err, list: {name: string}[]) {
-          client.end();
-
-          if (err) {
-            resolve(new Error(errorMessage));
-          } else {
-            resolve(list.map(e => e.name));
-          }
-        })
+      client.access({
+        host: host,
+      }).then(() => {
+        client.list(directory).then((info: ftp.FileInfo[]) => {
+          resolve(info.map(inf => inf.name));
+        }).catch((reason) => {
+          resolve(new Error(reason));
+        });
+      }).catch((reason) => {
+        resolve(new Error(reason));
       });
-
-      client.on('error', () => {
-        resolve(new Error(errorMessage));
-      })
-
-      client.connect({host: host});
-    } catch (err) {
+    } catch(err) {
       resolve(new Error(errorMessage));
     }
   });
