@@ -205,7 +205,7 @@ async function downloadGRIB(runTimeStr: string, runDateStr: string, lat: number,
     bottomlat: (lat - 1).toString()
   });
 
-  return await window.IO.download(fetchURL, "data.grib2");
+  return await window.IO.downloadFromHTTPS(fetchURL, "data.grib2");
 }
 
 function findBoundaries(lines: string[][]) {

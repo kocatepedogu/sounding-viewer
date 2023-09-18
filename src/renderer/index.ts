@@ -128,7 +128,7 @@ export class Options {
       const host = "ftp.ncep.noaa.gov";
       const mainDirectory = "/pub/data/nccf/com/gfs/prod";
 
-      const directories = <string[]|Error>(await window.IO.listFiles(host, mainDirectory));
+      const directories = <string[]|Error>(await window.IO.getFileListFromFTP(host, mainDirectory));
       if (directories instanceof Error) {
         alert('Cannot connect server');
         return;
@@ -147,7 +147,7 @@ export class Options {
   private async updateDate(host:string, mainDirectory: string, date: string) {
     this.removeDownto(3);
 
-    const directories = <string[]|Error>(await window.IO.listFiles(host, mainDirectory + '/gfs.' + date));
+    const directories = <string[]|Error>(await window.IO.getFileListFromFTP(host, mainDirectory + '/gfs.' + date));
     if (directories instanceof Error) {
       alert('Cannot connect server');
       return;
@@ -161,7 +161,7 @@ export class Options {
   private async updateRun(host:string, mainDirectory: string, date:string, run: string) {
     this.removeDownto(4);
 
-    const files = <string[]|Error>(await window.IO.listFiles(host, `${mainDirectory}/gfs.${date}/${run}/atmos`));
+    const files = <string[]|Error>(await window.IO.getFileListFromFTP(host, `${mainDirectory}/gfs.${date}/${run}/atmos`));
     if (files instanceof Error) {
       alert('Cannot connect server');
       return;

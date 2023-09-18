@@ -12,18 +12,20 @@
     "@electron-forge/maker-wix": "^6.4.2",
     "@electron-forge/maker-zip": "^6.4.2",
     "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
+    "@types/ftp": "^0.3.34",
+    "@types/node": "^20.6.2",
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "electron": "^26.2.1",
     "electron-wix-msi": "^5.0.0",
     "eslint": "^8.48.0",
+    "ol": "^8.1.0",
     "prettier": "^3.0.3",
+    "source-map-loader": "^1.0.0",
     "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",
     "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4",
-    "ol": "^8.1.0",
-    "source-map-loader": "^1.0.0"
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "ftp": "^0.3.10",

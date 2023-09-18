@@ -18,14 +18,12 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
-
-const { app, session, BrowserWindow, ipcMain, nativeTheme } = require('electron');
-const { initializeAppData, listFiles, download, wgrib2 } = require('./io');
-const path = require('path');
+import { app, session, BrowserWindow, ipcMain, nativeTheme } from 'electron';
+import { initializeAppData, getFileListFromFTP, downloadFromHTTPS, wgrib2 } from './io';
+import path = require('path');
 
 function createWindow () {
-  session.defaultSession.webRequest.onHeadersReceived((details: any, callback: any) => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({ responseHeaders: Object.assign({
         "Content-Security-Policy": [ 
           `default-src 'self' 'unsafe-inline';` +
@@ -36,10 +34,6 @@ function createWindow () {
   });
 
   const win = new BrowserWindow({
-    contextIsolation: true,
-    nodeIntegration: false,
-    nodeIntegrationInWorker: false,
-
     autoHideMenuBar: true,
     width: 1152,
     height: 720,
@@ -52,22 +46,24 @@ function createWindow () {
       webSecurity: true,
       allowRunningInsecureContent: false,
       experimentalFeatures: false,
-      enableBlinkFeatures: false
+      contextIsolation: true,
+      nodeIntegration: false,
+      nodeIntegrationInWorker: false,
     }
   });
 
-  ipcMain.handle('listFiles', (event:never, host:string, directory: string) => {
-    <never>event;
-    return listFiles(host, directory);
+  ipcMain.handle('getFileListFromFTP', (event, host:string, directory: string) => {
+    event;
+    return getFileListFromFTP(host, directory);
   });
 
-  ipcMain.handle('download', (event:never, url:string, filename:string) => {
-    <never>event;
-    return download(url, filename);
+  ipcMain.handle('downloadFromHTTPS', (event, url:string, filename:string) => {
+    event;
+    return downloadFromHTTPS(url, filename);
   });
 
-  ipcMain.handle('wgrib2', (event:never, gribfile:string) => {
-    <never>event;
+  ipcMain.handle('wgrib2', (event, gribfile:string) => {
+    event;
     return wgrib2(gribfile);
   })
 
