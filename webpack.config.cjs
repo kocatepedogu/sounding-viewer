@@ -4,7 +4,7 @@
 const path = require('path');
 
 let common = {
-  mode: 'development',
+  mode: 'production',
   module: {
     rules: [
       {

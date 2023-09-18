@@ -20,21 +20,41 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const { app, BrowserWindow, ipcMain, nativeTheme } = require('electron');
+const { app, session, BrowserWindow, ipcMain, nativeTheme } = require('electron');
 const { initializeAppData, listFiles, download, wgrib2 } = require('./io');
 const path = require('path');
 
 function createWindow () {
+  session.defaultSession.webRequest.onHeadersReceived((details: any, callback: any) => {
+    callback({ responseHeaders: Object.assign({
+        "Content-Security-Policy": [ 
+          `default-src 'self' 'unsafe-inline';` +
+          `img-src https://tile.openstreetmap.org/;` +
+          `connect-src https://rucsoundings.noaa.gov/;`
+        ]
+    }, details.responseHeaders)});
+  });
+
   const win = new BrowserWindow({
+    contextIsolation: true,
+    nodeIntegration: false,
+    nodeIntegrationInWorker: false,
+
     autoHideMenuBar: true,
     width: 1152,
     height: 720,
     minWidth: 1152,
     minHeight: 720,
     webPreferences: {
-      preload: path.join(app.getAppPath(), 'src/main/preload.js')
+      preload: path.join(app.getAppPath(), 'src/main/preload.js'),
+
+      sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
+      experimentalFeatures: false,
+      enableBlinkFeatures: false
     }
-  })
+  });
 
   ipcMain.handle('listFiles', (event:never, host:string, directory: string) => {
     <never>event;
@@ -58,6 +78,7 @@ function createWindow () {
 try {
   initializeAppData();
 
+  app.enableSandbox();
   app.whenReady().then(() => {
     createWindow()
 

@@ -1,0 +1,59 @@
+/*!
+ * XRegExp Prototype Methods v1.0.0
+ * (c) 2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ */
+
+/*!
+ * XRegExp Unicode Base v1.0.0
+ * (c) 2008-2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ * Uses Unicode 6.1 <http://unicode.org/>
+ */
+
+/*!
+ * XRegExp Unicode Blocks v1.2.0
+ * (c) 2010-2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ * Uses Unicode 6.1 <http://unicode.org/>
+ */
+
+/*!
+ * XRegExp Unicode Categories v1.2.0
+ * (c) 2010-2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ * Uses Unicode 6.1 <http://unicode.org/>
+ */
+
+/*!
+ * XRegExp Unicode Properties v1.0.0
+ * (c) 2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ * Uses Unicode 6.1 <http://unicode.org/>
+ */
+
+/*!
+ * XRegExp Unicode Scripts v1.2.0
+ * (c) 2010-2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ * Uses Unicode 6.1 <http://unicode.org/>
+ */
+
+/*!
+ * XRegExp v2.0.0
+ * (c) 2007-2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ */
+
+/*!
+ * XRegExp.build v0.1.0
+ * (c) 2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ * Inspired by RegExp.create by Lea Verou <http://lea.verou.me/>
+ */
+
+/*!
+ * XRegExp.matchRecursive v0.2.0
+ * (c) 2009-2012 Steven Levithan <http://xregexp.com/>
+ * MIT License
+ */
