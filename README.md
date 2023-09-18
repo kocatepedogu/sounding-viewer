@@ -4,8 +4,9 @@ An open source sounding viewer and editor. The application provides a simple int
 
 ![map](./resources/map.png) ![map](./resources/app.png)
 
-<a href="url"><img src="./resources/map.png" align="left" width="240" ></a>
-<a href="url"><img src="./resources/app.png" align="left" width="240" ></a>
+<img src="./resources/map.png" align="left" width="240" >
+<img src="./resources/app.png" align="left" width="240" >
+<br>
 
 Features:
 + All values in the sounding table are modifiable. Changes are immediately reflected in the diagram and in the indices panel.
