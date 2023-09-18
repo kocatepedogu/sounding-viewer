@@ -18,10 +18,7 @@ No external dependencies are required for soundings obtained from rucsoundings.n
 
 **On Windows**
 
-The wgrib2 binaries together with necessary Cygwin DLLs are provided at the wgrib2 website:
-[https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/](https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/)
-
-Download all files at the link into the same directory, and add that directory to the environment variable PATH before installing Sounding Viewer.
+The wgrib2 binaries together with necessary Cygwin DLLs are provided at the wgrib2 website: [https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/](https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/) Download all files at the link into the same directory, and add that directory to the environment variable PATH before installing Sounding Viewer.
 
 **On Linux**
 
