@@ -32,16 +32,15 @@
     <div id="sounding-table"></div>
     <div id="sounding-diagram-container">
       <div id="sounding-diagram-title">[Model]</div>
-      <canvas id="sounding-diagram" width="500" height="600px"></canvas>
-      <div id="sounding-diagram-settings">
-        <p><label id="sounding-error"></label></p>
-        <label>Skew: <input id="skew-input" type="number"></label>
-        <label>Tstep: <input id="tstep-input" type="number" min="1"></label>
-        <label>Tmin: <input id="tmin-input" type="number" disabled></label>
-        <label>Tmax: <input id="tmax-input" type="number" disabled></label>
-        <label><input type="checkbox" id="check-automatic-limits" checked>Automatic</label>
+      <div id="sounding-diagram-toolbar">
+        <button type="submit" id="load-new-btn" onclick="window.location.href='./index.html';">New</button>
+        <button type="button" id="settings-btn">Settings</button>
+        <button type="button" id="export-btn">Export</button>
       </div>
+      <canvas id="sounding-diagram"></canvas>
+      <p><label id="sounding-error"></label></p>
     </div>
+
     <div id="sounding-right-panel">
       <div class="feature-list">
         <div class="feature-list-title">Functions</div>
@@ -53,6 +52,17 @@
       </div>
       <div id="sounding-indices-title">Indices</div>
       <div id="sounding-indices-body"></div>
+    </div>
+  </div>
+
+  <div id="sounding-diagram-settings" hidden>
+    <div id="sounding-diagram-settings-title">Diagram Settings <div id="sounding-diagram-settings-close">X</div></div>
+    <div id="sounding-diagram-settings-body">
+      <br><label>Skew: <input id="skew-input" type="number"></label>
+      <br><label>Tstep: <input id="tstep-input" type="number" min="1"></label>
+      <br><label>Tmin: <input id="tmin-input" type="number" disabled></label>
+      <br><label>Tmax: <input id="tmax-input" type="number" disabled></label>
+      <br><label><input type="checkbox" id="check-automatic-limits" checked>Automatic</label>
     </div>
   </div>
 

@@ -40,6 +40,7 @@ html, body {
   font-size: 10pt;
   align-items: stretch;
   font-family: liberation;
+  user-select: none;
 }
 
 #loading-div {
@@ -144,12 +145,49 @@ html, body {
   color: white;
 }
 
+#sounding-diagram-toolbar {
+  width: 100%;
+  background-color: var(--light-gray);
+  height: var(--title-height);
+  text-align: left;
+}
+
 #sounding-diagram-container {
   float: left;
   white-space: normal;
   width: 60vw;
   height: 100vh;
   text-align: center;
+}
+
+#sounding-diagram-settings {
+  position: absolute;
+  top: 250px;
+  left: 250px;
+  width: 120px;
+  height: 250px;
+  background-color: rgb(233, 233, 233);
+  border: rgb(121, 121, 121);
+  border-width: 1px;
+  border-style:solid;
+  text-align: left;
+}
+
+#sounding-diagram-settings-title {
+  width: 100%;
+  background-color: var(--dark);
+  color: white;
+  cursor: move;
+}
+
+#sounding-diagram-settings-close {
+  float:right;
+  background-color: #888888;
+  cursor: pointer;
+}
+
+#sounding-diagram-settings-body {
+  padding:10px;
 }
 
 #sounding-diagram-settings input[type=number] {

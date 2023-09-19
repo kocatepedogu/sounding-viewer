@@ -24,6 +24,7 @@ import * as data from "./data"
 import * as table from "./table"
 import * as diagram from "./diagram"
 import * as indices from "./indices"
+import { Dialog } from "./dialog"
 
 function getData(){
   const url = new URL(window.location.href);
@@ -63,9 +64,12 @@ function setTitle() {
     `${modelName} ${lat},${lon} ${hour}h`;
 }
 
+getData;
+
 window.initializeSounding = function() {
-  setTitle();
-  getData().then(async (src: Iterable<data.LevelSource>) => {
+  //setTitle();
+  setTitle;
+  rucsoundings.example().then(async (src: Iterable<data.LevelSource>) => {
     const sounding = new data.Sounding(src);
     const plt = new diagram.SoundingPlot(sounding);
     const ind = new indices.IndexTable(sounding);
@@ -77,4 +81,6 @@ window.initializeSounding = function() {
     document.getElementById('main-div')!.style.visibility = "visible";
     document.getElementById('loading-div')!.style.visibility = "hidden";
   });
+
+  new Dialog("sounding-diagram-settings");
 }

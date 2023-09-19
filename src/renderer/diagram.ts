@@ -48,8 +48,8 @@ export class SoundingPlot {
   private sounding: data.Sounding;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private width: number;
-  private height: number;
+  private width!: number;
+  private height!: number;
 
   private skew: number = 45;
   private skewInput!: HTMLInputElement;
@@ -63,6 +63,7 @@ export class SoundingPlot {
   private tstepInput!: HTMLInputElement;
   private pmin: number = NaN;
   private pmax: number = NaN;
+  private settingsButton!: HTMLButtonElement;
 
   private plotWidth: number = NaN;
   private plotHeight: number = NaN;
@@ -112,8 +113,7 @@ export class SoundingPlot {
     this.sounding = sounding;
     this.canvas = document.getElementById('sounding-diagram') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d')!;
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
+    this.determineCanvasSize();
 
     this.sounding.addObserver(() => {
       this.update();
@@ -122,6 +122,32 @@ export class SoundingPlot {
     this.initializeDiagramSettings();
     this.initializeFeatureList('sounding-function-list-ul', this.functions);
     this.initializeFeatureList('sounding-curve-list-ul', this.curves);
+
+    window.addEventListener('resize', () => {
+      this.determineCanvasSize();
+      this.update();
+    });
+  }
+
+  /**
+   * Determines size of canvas based on the size of the div containing it.
+   */
+  private determineCanvasSize() {
+    const containerDiv = document.getElementById('sounding-diagram-container');
+
+    const H = containerDiv!.clientHeight! * 0.8;
+    const W = containerDiv!.clientWidth! * 0.8;
+    
+    if (H * 4/5 >= W) {
+      this.width = W;
+      this.height = W * 5/4;
+    } else {
+      this.width = H * 4/5;
+      this.height = H;
+    }
+
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
   }
 
   /**
@@ -169,6 +195,11 @@ export class SoundingPlot {
       this.tstep = parseInt(this.tstepInput.value);
       this.update();
     });
+
+    this.settingsButton = document.getElementById('settings-btn') as HTMLButtonElement;
+    this.settingsButton.addEventListener('click', () => {
+      document.getElementById('sounding-diagram-settings')!.hidden = false;
+    })
   }
 
   /**

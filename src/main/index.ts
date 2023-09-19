@@ -35,10 +35,10 @@ function createWindow () {
 
   const win = new BrowserWindow({
     autoHideMenuBar: true,
-    width: 1152,
+    width: 1024,
     height: 720,
-    minWidth: 1152,
-    minHeight: 720,
+    minWidth: 700,
+    minHeight: 500,
     webPreferences: {
       preload: path.join(app.getAppPath(), 'src/main/preload.js'),
 
