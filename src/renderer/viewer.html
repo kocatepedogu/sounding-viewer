@@ -36,6 +36,7 @@
         <button type="submit" id="load-new-btn" onclick="window.location.href='./index.html';">New</button>
         <button type="button" id="settings-btn">Settings</button>
         <button type="button" id="level-details-btn">Level details</button>
+        <button type="button" id="hodograph-btn">Hodograph</button>
         <button type="button" id="export-btn">Export</button>
       </div>
       <canvas id="sounding-diagram"></canvas>
@@ -66,6 +67,13 @@
       <div id="sounding-level-details-close" class="dialog-close">X</div>
     </div>
     <textarea id="sounding-level-details-text" readonly></textarea>
+  </div>
+
+  <div id="hodograph" hidden>
+    <div id="hodograph-title" class="dialog-title">Hodograph
+      <div id="hodograph-close" class="dialog-close">X</div>
+    </div>
+    <canvas id="hodograph-canvas" width="360px" height="360px"></canvas>
   </div>
 
   <div id="sounding-diagram-settings" hidden>

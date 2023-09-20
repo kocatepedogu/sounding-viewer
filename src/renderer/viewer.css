@@ -195,6 +195,17 @@ html, body {
   text-align: left;
 }
 
+#hodograph {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  background-color: rgb(233, 233, 233);
+  border: rgb(121, 121, 121);
+  border-width: 1px;
+  border-style:solid;
+  text-align: left;
+}
+
 .dialog-title {
   width: 100%;
   background-color: var(--dark);

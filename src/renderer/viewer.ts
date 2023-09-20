@@ -27,6 +27,7 @@ import * as diagram from "./diagram"
 import * as indices from "./indices"
 import * as levelDetails from "./leveldetails"
 import { Dialog } from "./dialog"
+import { Hodograph } from './hodograph'
 
 function getData(){
   const url = new URL(window.location.href);
@@ -101,8 +102,10 @@ window.initializeSounding = async function() {
   })();
 
   setTitle();
+  
   const snd = new sounding.Sounding(src);
   const plt = new diagram.SoundingPlot(snd);
+  const hod = new Hodograph(snd);
   const ind = new indices.IndexTable(snd);
   const tbl = new table.SoundingTable(snd);
   const det = new levelDetails.LevelDetails(snd);
@@ -111,19 +114,26 @@ window.initializeSounding = async function() {
   tbl.addObserver((lev) => det.setLevel(lev));
   plt.update();
   ind.update();
+  hod.update();
+
+  new Dialog("sounding-diagram-settings");
+  new Dialog("sounding-level-details");
+  new Dialog("hodograph");
 
   document.getElementById('export-btn')?.addEventListener('click', () => {
     exportData(snd);
   });
 
   document.getElementById('level-details-btn')?.addEventListener('click', () => {
-    const levelDetailsDialog = document.getElementById('sounding-level-details');
-    levelDetailsDialog!.hidden = false;
+    const levelDetailsDialog = document.getElementById('sounding-level-details')!;
+    levelDetailsDialog.hidden = false;
   })
+
+  document.getElementById('hodograph-btn')?.addEventListener('click', () => {
+    const hodographDialog = document.getElementById('hodograph')!;
+    hodographDialog.hidden = false;
+  });
 
   document.getElementById('main-div')!.style.visibility = "visible";
   document.getElementById('loading-div')!.style.visibility = "hidden";
-
-  new Dialog("sounding-diagram-settings");
-  new Dialog("sounding-level-details");
 }
