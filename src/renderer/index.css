@@ -79,3 +79,9 @@ form {
   height: 100%;
   float: left;
 }
+
+#copyright-notice {
+  position: absolute;
+  bottom:0px; font-size: 8pt;
+  padding: 8px;
+}

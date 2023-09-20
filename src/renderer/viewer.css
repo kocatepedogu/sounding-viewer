@@ -220,6 +220,12 @@ html, body {
   color: red;
 }
 
+#copyright-notice {
+  position: absolute;
+  bottom:0px; font-size: 8pt;
+  padding: 8px;
+}
+
 /* Right panel */
 
 #sounding-right-panel {
