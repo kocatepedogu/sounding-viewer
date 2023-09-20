@@ -102,7 +102,7 @@ html, body {
   background-color: var(--table-hover-color);
 }
 
-.sounding-table-title-column, .sounding-table-data-cells, .sounding-table-check-cells {
+.sounding-table-title-column, .sounding-table-data-cells, .sounding-table-check-cells, .sounding-table-wind-cells {
   display: inline-block;
   width: 3vw;
   min-width: 40px;

@@ -24,12 +24,8 @@
  * @returns Wind direction in degrees
  */
 export function windDirection(u:number, v:number): number {
-  const dir = Math.atan2(v, u) * 180 / Math.PI;
-  if (dir < 0) {
-    return dir + 360;
-  } else {
-    return dir;
-  }
+  const deg = -Math.atan2(v, u) * 180 / Math.PI - 90;
+  return deg < 0 ? deg + 360 : deg;
 }
 
 /**

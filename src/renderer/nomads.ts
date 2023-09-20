@@ -92,8 +92,8 @@ class GRIBData {
       height: parseFloat((this.get(surfaceLevel, GRIBValueType.Height)).toFixed(0)),
       temp: parseFloat((this.get(above2mLevel, GRIBValueType.Temperature) - 273.15).toFixed(2)),
       dewpt: parseFloat((this.get(above2mLevel, GRIBValueType.Dewpoint) - 273.15).toFixed(2)),
-      winddir: parseFloat((numerical.windDirection(u10m, v10m) * 3.6).toFixed(0)),
-      windspd: parseFloat(numerical.windSpeed(u10m, v10m).toFixed(0))
+      winddir: parseFloat(numerical.windDirection(u10m, v10m).toFixed(0)),
+      windspd: parseFloat((numerical.windSpeed(u10m, v10m) * 3.6).toFixed(0))
     }
 
     /* The first level in the result is the surface level */
@@ -124,8 +124,8 @@ class GRIBData {
         height: parseFloat((this.get(pressureLevel, GRIBValueType.Height)).toFixed(0)),
         temp: parseFloat(tmp.toFixed(2)),
         dewpt: parseFloat(dpt.toFixed(2)),
-        winddir: parseFloat((numerical.windDirection(u, v) * 3.6).toFixed(0)),
-        windspd: parseFloat(numerical.windSpeed(u, v).toFixed(0))
+        winddir: parseFloat(numerical.windDirection(u, v).toFixed(0)),
+        windspd: parseFloat((numerical.windSpeed(u, v) * 3.6).toFixed(0))
       });
     }
     

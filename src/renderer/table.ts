@@ -32,7 +32,8 @@ export class SoundingTable {
     "T",
     "Td",
     "Spd",
-    "Dir"
+    "Dir",
+    "Vec"
   ];
 
   /* Currently edited cell */
@@ -77,6 +78,11 @@ export class SoundingTable {
     this.levelProperties.forEach(prop => { 
       newRow += `<div class="sounding-table-data-cells" id="${level.id + '-' + prop}">${level[prop]}</div>`; 
     });
+
+    newRow += `<div class="sounding-table-wind-cells" id="${level.id + '-arrow'}">
+                  <object data="../../resources/arrow.svg" width="16px" height="16px" style="transform: rotate(${(-90 + level.winddir) % 360}deg);">
+                  </object>
+               </div>`;
 
     return newRow + `</div>`;
   }

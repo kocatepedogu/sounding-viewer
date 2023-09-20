@@ -145,9 +145,9 @@ export class SoundingPlot {
   private determineCanvasSize() {
     const containerDiv = document.getElementById('sounding-diagram-container')!;
 
-    const H = containerDiv.clientHeight! * 0.85;
-    const W = containerDiv.clientWidth! * 0.85;
-    
+    const W = containerDiv.clientWidth! * 0.75;
+    const H = containerDiv.clientHeight! * 0.80;
+
     if (H * 4/5 >= W) {
       this.width = W;
       this.height = W * 5/4;

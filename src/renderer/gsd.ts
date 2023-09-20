@@ -195,6 +195,8 @@ export class GSD implements Iterable<sounding.LevelSource> {
     const levels: Array<Level> = [];
     const header: Array<Header> = [];
 
+    let windUnitCoeff: number = 1.0;
+
     let levelIndex = 0;
     let headerIndex = 0;
     for (let i = 0; i < lines.length; i++) {
@@ -226,6 +228,12 @@ export class GSD implements Iterable<sounding.LevelSource> {
             break;
 
           case LineType.StationIdentifierOtherIndicatorsLine:
+            if (words[3] == 'ms') {
+              windUnitCoeff = 3.6;
+            } else if (words[3] == 'kt') {
+              windUnitCoeff = 1.852;
+            }
+
             header[headerIndex++] = {
               staid: words[1],
               sonde: RadiosondeType[words[2] as keyof typeof RadiosondeType],
@@ -241,7 +249,7 @@ export class GSD implements Iterable<sounding.LevelSource> {
               temp: parseFloatValue(words[3]) / 10,
               dewpt: parseFloatValue(words[4]) / 10,
               winddir: parseFloatValue(words[5]),
-              windspd: parseFloatValue(words[6]),
+              windspd: parseFloat((parseFloatValue(words[6]) * windUnitCoeff).toFixed(2)),
               hmmm: words[7],
               bearing: words[8],
               range: words[9]

@@ -18,7 +18,7 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { app, session, BrowserWindow, ipcMain, nativeTheme } from 'electron';
+import { app, session, BrowserWindow, ipcMain, nativeTheme, /*Menu*/ } from 'electron';
 import { initializeAppData, getFileListFromFTP, downloadFromHTTPS, wgrib2 } from './io';
 import path = require('path');
 
@@ -76,6 +76,7 @@ try {
 
   app.enableSandbox();
   app.whenReady().then(() => {
+    //Menu.setApplicationMenu(null);
     createWindow()
 
     app.on('activate', () => {
