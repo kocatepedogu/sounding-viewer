@@ -101,12 +101,14 @@ export class Options {
       this.newFileInput("file", "File: ", (input) => {
         const file = input.files![0];
         const reader = new FileReader();
+
         reader.onload = (evt) => {
           localStorage.setItem('import', <string>evt.target!.result);
         };
         reader.onerror = () => {
           alert('Cannot read given file');
         }
+        
         reader.readAsText(file, 'UTF-8');
       });
     }

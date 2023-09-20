@@ -18,6 +18,7 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as GSD from './gsd'
 import * as rucsoundings from "./rucsoundings"
 import * as nomads from "./nomads"
 import * as data from "./data"
@@ -32,11 +33,11 @@ function getData(){
 
   switch (src) {
     case 'rucsoundings':
-      return rucsoundings.fetchGSD(url.searchParams);
+      return rucsoundings.fetchData(url.searchParams);
     case "nomads":
       return nomads.fetchGRIB(url.searchParams);
     case 'import':
-      return rucsoundings.parse(localStorage.getItem('import')!);
+      return GSD.parse(localStorage.getItem('import')!);
   }
 
   throw new Error("Not implemented");
