@@ -142,8 +142,6 @@ export async function fetchGRIB(params: URLSearchParams): Promise<Iterable<Level
   const lonStr = params.get('lon');
 
   if (!latStr || !lonStr || !hourStr || !runTimeStr || !runDateStr) {
-    alert("Missing parameters");
-    location.assign('./index.html');
     throw new Error("Missing parameters");
   }
 
@@ -153,17 +151,13 @@ export async function fetchGRIB(params: URLSearchParams): Promise<Iterable<Level
   /* Download corresponding data using GRIB filter */
   const result = await downloadGRIB(runTimeStr, runDateStr, lat, lon, hourStr);
   if (result instanceof Error) {
-    alert("Cannot connect to data server");
-    location.assign('./index.html');
-    throw result;
+    throw new Error("Cannot connect to data server.\n" + result.message);
   }
 
   /* Convert GRIB2 to CSV using wgrib2 */
   const lines = await window.IO.wgrib2('data.grib2');
   if (lines instanceof Error) {
-    alert("wgrib2 failed.");
-    location.assign('./index.html');
-    throw result;
+    throw new Error("wgrib2 failed.\n" + lines.message);
   }
 
   /* Find coordinate boundaries of data */

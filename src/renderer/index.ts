@@ -140,11 +140,77 @@ export class Options {
   private async updateTypeNOMADS(type: string) {
     this.removeDownto(2);
 
+    const updateHour = async () => {
+      this.removeDownto(5);
+
+      const lat = this.newTextbox('lat', 'Latitude');
+      const lon = this.newTextbox('lon', 'Longtitude');
+      if (!Number.isNaN(this.lastLat)) lat.value = this.lastLat.toString();
+      if (!Number.isNaN(this.lastLon)) lon.value = this.lastLon.toString();
+
+      this.map.setClickHandler((evt: MapBrowserEvent<UIEvent>) => {
+        const [x, y] = transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
+
+        lat.value = y.toString();
+        lon.value = x.toString();
+        this.lastLat = y;
+        this.lastLon = x;
+      }); 
+    }
+
+    const updateRun = async (host:string, mainDirectory: string, date:string, run: string) => {
+      this.removeDownto(4);
+
+      this.disableInputs();
+      const files = await window.IO.getFileListFromFTP(host, `${mainDirectory}/gfs.${date}/${run}/atmos`);
+      this.enableInputs();
+
+      if (files instanceof Error) {
+        alert('Cannot connect server');
+        return;
+      }
+
+      const gfsFiles = files.filter((e: string) => {
+        const params = e.split('.');
+        return params.length == 5 && params[0] == 'gfs' && params[1].substring(1,3) == run && 
+                params[2] == 'pgrb2' && params[3] == '0p25' && params[4] != 'anl';});
+
+      const gfsHours = gfsFiles.map((e: string) => {
+        const params = e.split('.');
+        return params[4].substring(1);
+      });
+
+      this.newSelect('hour', 'Hour',
+        () => updateHour(), 
+        ...gfsHours.map((hour: string) => this.newOption(hour, hour))
+      );
+    }
+
+    const updateDate = async(host:string, mainDirectory: string, date: string) => {
+      this.removeDownto(3);
+
+      this.disableInputs();
+      const directories = await window.IO.getFileListFromFTP(host, mainDirectory + '/gfs.' + date);
+      this.enableInputs();
+
+      if (directories instanceof Error) {
+        alert('Cannot connect server');
+        return;
+      }
+
+      this.newSelect('runTime', 'Run Hour', 
+      (run) => updateRun(host, mainDirectory, date, run), 
+      ...directories.map((run: string) => this.newOption(run, run)).reverse());
+    }
+
     if (type == 'gfs') {
       const host = "ftp.ncep.noaa.gov";
       const mainDirectory = "/pub/data/nccf/com/gfs/prod";
 
-      const directories = <string[]|Error>(await window.IO.getFileListFromFTP(host, mainDirectory));
+      this.disableInputs();
+      const directories = await window.IO.getFileListFromFTP(host, mainDirectory);
+      this.enableInputs();
+
       if (directories instanceof Error) {
         alert('Cannot connect server');
         return;
@@ -154,67 +220,10 @@ export class Options {
       const gfsDates = gfsDirectories.map((e: string) => e.split('.')[1]).reverse();
 
       this.newSelect('runDate', 'Run Date', 
-        (date) => this.updateDate(host, mainDirectory, date), 
+        (date) => updateDate(host, mainDirectory, date), 
         ...gfsDates.map((date:string) => 
           this.newOption(date, `${date.substring(0,4)}/${date.substring(4,6)}/${date.substring(6,8)}`)));
     }
-  }
-
-  private async updateDate(host:string, mainDirectory: string, date: string) {
-    this.removeDownto(3);
-
-    const directories = <string[]|Error>(await window.IO.getFileListFromFTP(host, mainDirectory + '/gfs.' + date));
-    if (directories instanceof Error) {
-      alert('Cannot connect server');
-      return;
-    }
-
-    this.newSelect('runTime', 'Run Hour', 
-    (run) => this.updateRun(host, mainDirectory, date, run), 
-    ...directories.map((run: string) => this.newOption(run, run)).reverse());
-  }
-
-  private async updateRun(host:string, mainDirectory: string, date:string, run: string) {
-    this.removeDownto(4);
-
-    const files = <string[]|Error>(await window.IO.getFileListFromFTP(host, `${mainDirectory}/gfs.${date}/${run}/atmos`));
-    if (files instanceof Error) {
-      alert('Cannot connect server');
-      return;
-    }
-
-    const gfsFiles = files.filter((e: string) => {
-      const params = e.split('.');
-      return params.length == 5 && params[0] == 'gfs' && params[1].substring(1,3) == run && 
-              params[2] == 'pgrb2' && params[3] == '0p25' && params[4] != 'anl';});
-
-    const gfsHours = gfsFiles.map((e: string) => {
-      const params = e.split('.');
-      return params[4].substring(1);
-    });
-
-    this.newSelect('hour', 'Hour',
-      () => this.updateHour(), 
-      ...gfsHours.map((hour: string) => this.newOption(hour, hour))
-    )
-  }
-
-  private async updateHour() {
-    this.removeDownto(5);
-
-    const lat = this.newTextbox('lat', 'Latitude');
-    const lon = this.newTextbox('lon', 'Longtitude');
-    if (!Number.isNaN(this.lastLat)) lat.value = this.lastLat.toString();
-    if (!Number.isNaN(this.lastLon)) lon.value = this.lastLon.toString();
-
-    this.map.setClickHandler((evt: MapBrowserEvent<UIEvent>) => {
-      const [x, y] = transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
-
-      lat.value = y.toString();
-      lon.value = x.toString();
-      this.lastLat = y;
-      this.lastLon = x;
-    }); 
   }
 
   private removeDownto(n: number) {
@@ -294,6 +303,20 @@ export class Options {
 
     this.optionList.appendChild(li);
     return fileInput;
+  }
+
+  private disableInputs() {
+    document.body.style.cursor = 'progress';
+    document.querySelectorAll('input, select, button').forEach(
+      (element) => {(<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>element).disabled = true;}
+    );
+  }
+
+  private enableInputs() {
+    document.body.style.cursor = '';
+    document.querySelectorAll('input, select, button').forEach(
+      (element) => {(<HTMLInputElement|HTMLSelectElement|HTMLButtonElement>element).disabled = false;}
+    );
   }
 }
 

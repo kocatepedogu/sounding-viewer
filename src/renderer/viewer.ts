@@ -86,7 +86,18 @@ function setTitle() {
 }
 
 window.initializeSounding = async function() {
-  const src = await getData();
+  const src = await (async () => {
+    try {
+      return await getData();
+    } catch (err) {
+      if (err instanceof Error) {
+        alert(err.message);
+      }
+
+      location.assign('./index.html');
+      throw err;
+    }
+  })();
 
   setTitle();
   const snd = new sounding.Sounding(src);
