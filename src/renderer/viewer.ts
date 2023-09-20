@@ -18,10 +18,10 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as GSD from './gsd'
+import { GSD } from './gsd'
 import * as rucsoundings from "./rucsoundings"
 import * as nomads from "./nomads"
-import * as data from "./sounding"
+import * as sounding from "./sounding"
 import * as table from "./table"
 import * as diagram from "./diagram"
 import * as indices from "./indices"
@@ -41,6 +41,20 @@ function getData(){
   }
 
   throw new Error("Not implemented");
+}
+
+function exportData(data: sounding.Sounding) {
+  const gsd = GSD.from(data);
+  const str = GSD.stringify(gsd);
+
+  const a = document.createElement('a');
+  a.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(str));
+  a.setAttribute('download', 'sounding.txt');
+  a.style.display = 'none';
+  
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function setTitle() {
@@ -75,13 +89,17 @@ window.initializeSounding = async function() {
   const src = await getData();
 
   setTitle();
-  const sounding = new data.Sounding(src);
-  const plt = new diagram.SoundingPlot(sounding);
-  const ind = new indices.IndexTable(sounding);
-  new table.SoundingTable(sounding);
+  const snd = new sounding.Sounding(src);
+  const plt = new diagram.SoundingPlot(snd);
+  const ind = new indices.IndexTable(snd);
+  new table.SoundingTable(snd);
 
   plt.update();
   ind.update();
+
+  document.getElementById('export-btn')?.addEventListener('click', () => {
+    exportData(snd);
+  });
 
   document.getElementById('main-div')!.style.visibility = "visible";
   document.getElementById('loading-div')!.style.visibility = "hidden";

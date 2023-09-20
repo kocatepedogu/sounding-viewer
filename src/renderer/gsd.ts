@@ -25,7 +25,7 @@
  * GSD data files for GFS are obtained from https://rucsoundings.noaa.gov
  */
 
-import * as data from "./sounding"
+import * as sounding from "./sounding"
 
 export function parseIntValue(value: string) {
   if (value == '99999') {
@@ -143,7 +143,7 @@ export type Level = {
   readonly range: unknown;
 }
 
-export class GSD implements Iterable<data.LevelSource> {
+export class GSD implements Iterable<sounding.LevelSource> {
   readonly header: Array<Header> = [];
   readonly levels: Array<Level> = [];
 
@@ -154,78 +154,104 @@ export class GSD implements Iterable<data.LevelSource> {
 
   *[Symbol.iterator]() {
     for (const level of this.levels) {
-      yield <data.LevelSource>level;
+      yield <sounding.LevelSource>level;
     }
   }
-}
 
-export function parse(input: string): Promise<GSD> {
-  return new Promise(function (resolve, reject) {
-    try {
-      const lines = input.split('\n');
-      const levels: Array<Level> = [];
-      const header: Array<Header> = [];
+  static from(snd: Iterable<sounding.LevelSource>) {
+    const levs: Array<Level> = [];
+    for (const lev of snd) {
+      levs.push(Object.assign({}, lev, {
+        lineType: LineType.MandatoryLevel,
+        hmmm: '',
+        bearing: '',
+        range: ''
+      }));
+    }
 
-      let levelIndex = 0;
-      let headerIndex = 0;
-      for (let i = 0; i < lines.length; i++) {
-        const words: string[] = lines[i].trim().split(/\s+/);
-        if (Number(words[0])) {
-          const lineType: LineType = parseInt(words[0]);
+    return new GSD([], levs);
+  }
 
-          switch (lineType) {
-            case LineType.StationIdentificationLine:
-              header[headerIndex++] = {
-                wban: parseIntValue(words[1]),
-                wmo: parseIntValue(words[2]),
-                lat: parseFloatValue(words[3]),
-                lon: parseFloatValue(words[4]),
-                elev: parseFloatValue(words[5]),
-                rtime: parseIntValue(words[6])
-              };
-              break;
+  static stringify(gsd: GSD) {
+    let result = '';
 
-            case LineType.SoundingChecksLine:
-              header[headerIndex++] = {
-                hydro: parseIntValue(words[1]),
-                mxwd: parseIntValue(words[2]),
-                tropl: parseIntValue(words[3]),
-                lines: parseIntValue(words[4]),
-                tindex: parseIntValue(words[5]),
-                source: parseIntValue(words[6])
-              }
-              break;
+    for (const lev of gsd.levels) {
+      const newLine = lev.lineType.toString() + ' ' +
+                      (lev.pressure * 10).toFixed(2) + ' ' +
+                      (lev.height).toFixed(2) + ' ' +
+                      (lev.temp * 10).toFixed(2) + ' ' +
+                      (lev.dewpt * 10).toFixed(2) + ' ' +
+                      (lev.winddir).toFixed(0) + ' ' +
+                      (lev.windspd).toFixed(0);
 
-            case LineType.StationIdentifierOtherIndicatorsLine:
-              header[headerIndex++] = {
-                staid: words[1],
-                sonde: RadiosondeType[words[2] as keyof typeof RadiosondeType],
-                wsunits: WindSpeedUnits[words[3] as keyof typeof WindSpeedUnits]
-              }
-              break;
+      result += newLine + '\n';
+    }
 
-            default: {
-              levels[levelIndex++] = {
-                lineType: lineType,
-                pressure: parseIntValue(words[1]) / 10,
-                height: parseIntValue(words[2]),
-                temp: parseIntValue(words[3]) / 10,
-                dewpt: parseIntValue(words[4]) / 10,
-                winddir: parseIntValue(words[5]),
-                windspd: parseIntValue(words[6]),
-                hmmm: words[7],
-                bearing: words[8],
-                range: words[9]
-              }
-              break;
+    return result;
+  }
+
+  static parse(input: string) {
+    const lines = input.split('\n');
+    const levels: Array<Level> = [];
+    const header: Array<Header> = [];
+
+    let levelIndex = 0;
+    let headerIndex = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const words: string[] = lines[i].trim().split(/\s+/);
+      if (Number(words[0])) {
+        const lineType: LineType = parseInt(words[0]);
+
+        switch (lineType) {
+          case LineType.StationIdentificationLine:
+            header[headerIndex++] = {
+              wban: parseIntValue(words[1]),
+              wmo: parseIntValue(words[2]),
+              lat: parseFloatValue(words[3]),
+              lon: parseFloatValue(words[4]),
+              elev: parseFloatValue(words[5]),
+              rtime: parseIntValue(words[6])
+            };
+            break;
+
+          case LineType.SoundingChecksLine:
+            header[headerIndex++] = {
+              hydro: parseIntValue(words[1]),
+              mxwd: parseIntValue(words[2]),
+              tropl: parseIntValue(words[3]),
+              lines: parseIntValue(words[4]),
+              tindex: parseIntValue(words[5]),
+              source: parseIntValue(words[6])
             }
+            break;
+
+          case LineType.StationIdentifierOtherIndicatorsLine:
+            header[headerIndex++] = {
+              staid: words[1],
+              sonde: RadiosondeType[words[2] as keyof typeof RadiosondeType],
+              wsunits: WindSpeedUnits[words[3] as keyof typeof WindSpeedUnits]
+            }
+            break;
+
+          default: {
+            levels[levelIndex++] = {
+              lineType: lineType,
+              pressure: parseFloatValue(words[1]) / 10,
+              height: parseFloatValue(words[2]),
+              temp: parseFloatValue(words[3]) / 10,
+              dewpt: parseFloatValue(words[4]) / 10,
+              winddir: parseFloatValue(words[5]),
+              windspd: parseFloatValue(words[6]),
+              hmmm: words[7],
+              bearing: words[8],
+              range: words[9]
+            }
+            break;
           }
         }
       }
-      
-      resolve(new GSD(header, levels));
-    } catch (e) {
-      return reject(e);
     }
-  });
+    
+    return new GSD(header, levels);
+  }
 }

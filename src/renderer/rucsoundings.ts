@@ -23,7 +23,7 @@
  * https://rucsoundings.noaa.gov/raob_format.html
  */
 
-import * as GSD from './gsd'
+import { GSD } from './gsd'
 
 export async function fetchGFS(params: URLSearchParams) {
   const lat = params.get('lat');
@@ -46,12 +46,11 @@ export async function fetchGFS(params: URLSearchParams) {
 
   const result = await fetch(fetchURL);
   const text = await result.text();
-  const gsd = await GSD.parse(text);
 
-  return gsd;
+  return GSD.parse(text);
 }
 
-export function fetchData(params: URLSearchParams): Promise<GSD.GSD> {
+export function fetchData(params: URLSearchParams): Promise<GSD> {
   const type = params.get('type');
   switch (type) {
     case 'gfs':
