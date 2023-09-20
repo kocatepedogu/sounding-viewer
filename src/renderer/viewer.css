@@ -160,6 +160,17 @@ html, body {
   text-align: center;
 }
 
+#sounding-diagram-information-box {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100px;
+  height: 25px;
+  background-color: rgba(221, 221, 221, 0.4);
+  border-radius: 5px;
+  text-align: left;
+}
+
 #sounding-diagram-settings {
   position: absolute;
   top: 250px;

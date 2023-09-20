@@ -68,15 +68,31 @@ export class Sounding implements Iterable<Level> {
   private observers: Array<() => void> = [];
 
   constructor(src: Iterable<LevelSource>) {
+    // Get level data from source
     this.levels = [];
     for (const level of src) {
-      const newLevel = new Level();
-      Object.assign(newLevel, level);
-      newLevel.enabled = newLevel.pressure > 300 ? 1 : 0;
-      this.levels.push(newLevel);
+      this.levels.push(Object.assign(new Level(), level));
     }
 
-    this.updateEnabledLevels();
+    // Fill missing data by linear interpolation
+    for (const prop of [['height',0], ['temp',2], ['dewpt',2], ['winddir',0], ['windspd',0]]) {
+      this.levels.forEach((lev) => {lev.enabled = Number.isNaN(lev[prop[0]]) ? 0 : 1;});
+      this.updateEnabledLevels();
+      for (const level of this.levels) {
+        if (Number.isNaN(level[<string>prop[0]])) {
+          try {
+            level[prop[0]] = parseFloat(this.getValueAt(level.pressure, <string>prop[0]).toFixed(<number>prop[1]));
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+    }
+
+    // Disable levels above 200 mb by default
+    for (const level of this.levels) {
+      level.enabled = level.pressure >= 200 ? 1 : 0;
+    }
   }
 
   /** Iterates over active levels */

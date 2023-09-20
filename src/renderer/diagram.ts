@@ -127,16 +127,20 @@ export class SoundingPlot {
       this.determineCanvasSize();
       this.update();
     });
+
+    this.canvas.addEventListener('mousemove', (e: MouseEvent) => {
+      this.updateInformationBox(e);
+    });
   }
 
   /**
    * Determines size of canvas based on the size of the div containing it.
    */
   private determineCanvasSize() {
-    const containerDiv = document.getElementById('sounding-diagram-container');
+    const containerDiv = document.getElementById('sounding-diagram-container')!;
 
-    const H = containerDiv!.clientHeight! * 0.8;
-    const W = containerDiv!.clientWidth! * 0.8;
+    const H = containerDiv.clientHeight! * 0.85;
+    const W = containerDiv.clientWidth! * 0.85;
     
     if (H * 4/5 >= W) {
       this.width = W;
@@ -200,6 +204,31 @@ export class SoundingPlot {
     this.settingsButton.addEventListener('click', () => {
       document.getElementById('sounding-diagram-settings')!.hidden = false;
     })
+  }
+
+  /**
+   * Shows a small box under cursor when the cursor is on the canvas.
+   * The box shows the temperature, height and pressure coordinates of the point.
+   */
+  private updateInformationBox(e: MouseEvent) {
+    const informationBox = document.getElementById('sounding-diagram-information-box')!;
+
+    if (e.offsetX < this.plotX || e.offsetX >= this.lastX || e.offsetY < this.plotY || e.offsetY >= this.lastY) {
+      informationBox.hidden = true;
+    } else {
+      informationBox.hidden = false;
+      informationBox.style.left = e.pageX.toString() + 'px';
+      informationBox.style.top = (e.pageY + 25).toString() + 'px';
+
+      const x = e.offsetX - this.plotX;
+      const y = e.offsetY - this.plotY;
+
+      const pres = this.pmin * Math.exp(y / this.rP);
+      informationBox.innerHTML = pres.toFixed(0) + 'mb &nbsp;';
+
+      const temp = this.tmin + (x - (this.plotHeight - y) * Math.sin(Math.PI * this.skew/180)) / this.rT;
+      informationBox.innerHTML += temp.toFixed(0) + '&deg;C';
+    }
   }
 
   /**
