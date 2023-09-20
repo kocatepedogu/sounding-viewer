@@ -40,7 +40,7 @@ module.exports = [
 
   Object.assign({}, common, {
     target: 'electron-renderer',
-    entry: ['./src/renderer/index.ts', './src/renderer/sounding.ts'],
+    entry: ['./src/renderer/index.ts', './src/renderer/viewer.ts'],
     output: {
       path: path.resolve(__dirname, 'src/renderer'),
       filename: 'bundle.js'

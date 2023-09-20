@@ -33,9 +33,10 @@ function getData(){
   switch (src) {
     case 'rucsoundings':
       return rucsoundings.fetchGSD(url.searchParams);
-    case "nomads": {
+    case "nomads":
       return nomads.fetchGRIB(url.searchParams);
-    }
+    case 'import':
+      return rucsoundings.parse(localStorage.getItem('import')!);
   }
 
   throw new Error("Not implemented");
@@ -44,6 +45,11 @@ function getData(){
 function setTitle() {
   const url = new URL(window.location.href);
   const src = url.searchParams.get('src');
+  if (src == 'import') {
+    document.getElementById('sounding-diagram-title')!.innerText = 'Imported';
+    return;
+  }
+
   const type = url.searchParams.get('type');
   const lat = parseFloat(url.searchParams.get('lat')!).toFixed(4);
   const lon = parseFloat(url.searchParams.get('lon')!).toFixed(4);
@@ -64,23 +70,20 @@ function setTitle() {
     `${modelName} ${lat},${lon} ${hour}h`;
 }
 
-getData;
+window.initializeSounding = async function() {
+  const src = await getData();
 
-window.initializeSounding = function() {
-  //setTitle();
-  setTitle;
-  rucsoundings.example().then(async (src: Iterable<data.LevelSource>) => {
-    const sounding = new data.Sounding(src);
-    const plt = new diagram.SoundingPlot(sounding);
-    const ind = new indices.IndexTable(sounding);
-    new table.SoundingTable(sounding);
-  
-    plt.update();
-    ind.update();
+  setTitle();
+  const sounding = new data.Sounding(src);
+  const plt = new diagram.SoundingPlot(sounding);
+  const ind = new indices.IndexTable(sounding);
+  new table.SoundingTable(sounding);
 
-    document.getElementById('main-div')!.style.visibility = "visible";
-    document.getElementById('loading-div')!.style.visibility = "hidden";
-  });
+  plt.update();
+  ind.update();
+
+  document.getElementById('main-div')!.style.visibility = "visible";
+  document.getElementById('loading-div')!.style.visibility = "hidden";
 
   new Dialog("sounding-diagram-settings");
 }

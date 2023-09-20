@@ -96,6 +96,20 @@ export class Options {
         (type) => {this.updateTypeNOMADS(type)},
         this.newOption('gfs', 'GFS 0.25', true));
     }
+
+    if (src == 'import') {
+      this.newFileInput("file", "File: ", (input) => {
+        const file = input.files![0];
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          localStorage.setItem('import', <string>evt.target!.result);
+        };
+        reader.onerror = () => {
+          alert('Cannot read given file');
+        }
+        reader.readAsText(file, 'UTF-8');
+      });
+    }
   }
 
   private updateTypeRucsoundings(type: string) {
@@ -208,7 +222,7 @@ export class Options {
   }
 
   private newOption(name: string, text: string, selected: boolean = false) {
-    const option = <HTMLOptionElement>document.createElement('option');
+    const option = document.createElement('option');
     option.textContent = text;
     option.value = name;
     option.selected = selected;
@@ -216,7 +230,7 @@ export class Options {
   }
 
   private newSelect(name: string, label: string, handler: (value: string) => void, ...options: HTMLOptionElement[]) {
-    const select = <HTMLSelectElement>document.createElement('select');
+    const select = document.createElement('select');
     select.name = name;
     select.id = name;
     select.addEventListener('input', () => {
@@ -227,11 +241,11 @@ export class Options {
       select.add(opt);
     }
 
-    const lbl = <HTMLLabelElement>document.createElement('label');
+    const lbl = document.createElement('label');
     lbl.textContent = label;
     lbl.appendChild(select);
 
-    const li = <HTMLLIElement>document.createElement('li');
+    const li = document.createElement('li');
     li.appendChild(lbl)
 
     this.optionList.appendChild(li);
@@ -241,23 +255,43 @@ export class Options {
   }
 
   private newTextbox(name: string, label: string, value: string = '') {
-    const textbox = <HTMLInputElement>document.createElement('input');
+    const textbox = document.createElement('input');
     textbox.type = 'text';
     textbox.value = value;
     textbox.name = name;
     textbox.id = name;
 
-    const lbl = <HTMLLabelElement>document.createElement('label');
+    const lbl = document.createElement('label');
     lbl.textContent = label;
     lbl.appendChild(textbox);
 
-    const li = <HTMLLIElement>document.createElement('li');
+    const li = document.createElement('li');
     li.appendChild(lbl);
 
     this.optionList.appendChild(li);
     textbox.dispatchEvent(new InputEvent('input'));
 
     return textbox;
+  }
+
+  private newFileInput(name: string, label: string, handler: (input: HTMLInputElement) => void) {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.name = name;
+    fileInput.id = name;
+    fileInput.addEventListener('input', () => {
+      handler(fileInput);
+    });
+
+    const lbl = document.createElement('label');
+    lbl.textContent = label;
+    lbl.appendChild(fileInput);
+
+    const li =document.createElement('li');
+    li.appendChild(lbl);
+
+    this.optionList.appendChild(li);
+    return fileInput;
   }
 }
 
