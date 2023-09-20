@@ -18,7 +18,7 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as data from "./data"
+import * as data from "./sounding"
 import * as numerical from "./numerical"
 
 interface PlotFeature {

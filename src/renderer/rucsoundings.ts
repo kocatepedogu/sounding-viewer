@@ -51,7 +51,7 @@ export async function fetchGFS(params: URLSearchParams) {
   return gsd;
 }
 
-export function fetchData(params: URLSearchParams): Promise<GSD> {
+export function fetchData(params: URLSearchParams): Promise<GSD.GSD> {
   const type = params.get('type');
   switch (type) {
     case 'gfs':

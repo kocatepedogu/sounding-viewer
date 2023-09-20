@@ -21,7 +21,7 @@
 import * as GSD from './gsd'
 import * as rucsoundings from "./rucsoundings"
 import * as nomads from "./nomads"
-import * as data from "./data"
+import * as data from "./sounding"
 import * as table from "./table"
 import * as diagram from "./diagram"
 import * as indices from "./indices"

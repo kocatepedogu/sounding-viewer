@@ -18,7 +18,7 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { LevelSource } from "./data";
+import { LevelSource } from "./sounding";
 import * as numerical from './numerical';
 
 enum GRIBLevelType {

@@ -25,7 +25,7 @@
  * GSD data files for GFS are obtained from https://rucsoundings.noaa.gov
  */
 
-import * as data from "./data"
+import * as data from "./sounding"
 
 export function parseIntValue(value: string) {
   if (value == '99999') {

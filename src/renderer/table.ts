@@ -18,7 +18,7 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as data from "./data"
+import * as data from "./sounding"
 
 export class SoundingTable {
   /* Level properties that will be displayed together with their titles */
