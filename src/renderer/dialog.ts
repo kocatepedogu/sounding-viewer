@@ -19,6 +19,10 @@
  */
 
 export class Dialog {
+  private static windows: Dialog[] = [];
+
+  private zIndex: number;
+
   private element: HTMLDivElement;
   private titleElement: HTMLDivElement;
   private closeBtn: HTMLDivElement;
@@ -34,6 +38,10 @@ export class Dialog {
     this.titleElement = <HTMLDivElement>document.getElementById(id + '-title')!;
     this.closeBtn = <HTMLDivElement>document.getElementById(id + '-close');
 
+    this.zIndex = Dialog.windows.length;
+    this.element.style.zIndex = this.zIndex.toString();
+    this.element.addEventListener('mousedown', () => {Dialog.raise(this)});
+
     this.isBeingMoved = false;
     this.pos1 = 0;
     this.pos2 = 0;
@@ -45,6 +53,8 @@ export class Dialog {
     document.addEventListener('mousemove', (e: MouseEvent) => {this.mouseMove(e)});
     this.titleElement.addEventListener('mousedown', (e: MouseEvent) => {this.mouseDown(e)});
     this.closeBtn.addEventListener('click', () => {this.close()});
+
+    Dialog.windows.push(this);
   }
   
   private mouseUp() {
@@ -122,5 +132,19 @@ export class Dialog {
 
   private close() {
     this.element.hidden = true;
+  }
+
+  private static raise(dialog: Dialog) {
+    const selfZ = dialog.zIndex;
+
+    for (const win of Dialog.windows) {
+      if (win.zIndex > selfZ) {
+        win.zIndex--;
+        win.element.style.zIndex = win.zIndex.toString();
+      }
+    }
+
+    dialog.zIndex = Dialog.windows.length;
+    dialog.element.style.zIndex = dialog.zIndex.toString();
   }
 }

@@ -21,6 +21,9 @@
 import * as data from "./sounding"
 
 export class SoundingTable {
+  private observers: Array<(lev: number) => void> = [];
+  private previousActiveLevel: number;
+
   /* Level properties that will be displayed together with their titles */
   private readonly levelProperties = ["pressure", "height", "temp", "dewpt", "windspd", "winddir"];
   private readonly levelPropertyTitles = [
@@ -179,8 +182,22 @@ export class SoundingTable {
     event.preventDefault();
   }
 
+  private mouseMoveHandler(event: MouseEvent, sounding: data.Sounding) {
+    const targetElement = event.target as HTMLElement;
+    if (targetElement.className == 'sounding-table-data-cells') {  
+      const id = parseInt(targetElement.id.split('-')[0]);
+      const level = sounding.find(id);
+      if (this.previousActiveLevel != level.pressure) {
+        this.observers.forEach(fn => fn(level.pressure));
+        this.previousActiveLevel = level.pressure;
+      }
+    }
+  }
+
   /* Fills table with given data and sets event handlers */
   constructor(sounding: data.Sounding) {
+    this.previousActiveLevel = sounding.first().pressure;
+
     /* Get sounding table element */
     const soundingTable = document.getElementById('sounding-table');
     if (!soundingTable) {
@@ -207,5 +224,11 @@ export class SoundingTable {
     /* Event handlers of table */
     soundingTable.addEventListener('click', (event) => {this.tableLeftClickHandler(event, sounding);});
     soundingTable.addEventListener('contextmenu', (event) => {this.tableRightClickHandler(event);});
+    soundingTable.addEventListener('mousemove', (event) => {this.mouseMoveHandler(event, sounding);});
+  }
+
+  /** Adds a callback function that gets called when the active level is changed */
+  addObserver(fncallback: (lev: number) => void) {
+    this.observers.push(fncallback);
   }
 }

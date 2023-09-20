@@ -184,14 +184,25 @@ html, body {
   text-align: left;
 }
 
-#sounding-diagram-settings-title {
+#sounding-level-details {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  background-color: rgb(233, 233, 233);
+  border: rgb(121, 121, 121);
+  border-width: 1px;
+  border-style:solid;
+  text-align: left;
+}
+
+.dialog-title {
   width: 100%;
   background-color: var(--dark);
   color: white;
   cursor: move;
 }
 
-#sounding-diagram-settings-close {
+.dialog-close {
   float:right;
   background-color: #888888;
   cursor: pointer;

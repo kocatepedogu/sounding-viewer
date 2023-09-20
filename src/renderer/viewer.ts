@@ -25,6 +25,7 @@ import * as sounding from "./sounding"
 import * as table from "./table"
 import * as diagram from "./diagram"
 import * as indices from "./indices"
+import * as levelDetails from "./leveldetails"
 import { Dialog } from "./dialog"
 
 function getData(){
@@ -103,8 +104,11 @@ window.initializeSounding = async function() {
   const snd = new sounding.Sounding(src);
   const plt = new diagram.SoundingPlot(snd);
   const ind = new indices.IndexTable(snd);
-  new table.SoundingTable(snd);
+  const tbl = new table.SoundingTable(snd);
+  const det = new levelDetails.LevelDetails(snd);
 
+  plt.addObserver((lev) => det.setLevel(lev));
+  tbl.addObserver((lev) => det.setLevel(lev));
   plt.update();
   ind.update();
 
@@ -112,8 +116,14 @@ window.initializeSounding = async function() {
     exportData(snd);
   });
 
+  document.getElementById('level-details-btn')?.addEventListener('click', () => {
+    const levelDetailsDialog = document.getElementById('sounding-level-details');
+    levelDetailsDialog!.hidden = false;
+  })
+
   document.getElementById('main-div')!.style.visibility = "visible";
   document.getElementById('loading-div')!.style.visibility = "hidden";
 
   new Dialog("sounding-diagram-settings");
+  new Dialog("sounding-level-details");
 }

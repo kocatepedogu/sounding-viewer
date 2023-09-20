@@ -45,6 +45,7 @@ interface PlotCurve extends PlotFeature {
 }
 
 export class SoundingPlot {
+  private observers: Array<(lev: number) => void> = [];
   private sounding: data.Sounding;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -131,6 +132,11 @@ export class SoundingPlot {
     this.canvas.addEventListener('mousemove', (e: MouseEvent) => {
       this.updateInformationBox(e);
     });
+  }
+
+  /** Adds a callback function that gets called when the active level is changed. */
+  addObserver(fncallback: (lev: number) => void) {
+    this.observers.push(fncallback);
   }
 
   /**
@@ -228,6 +234,8 @@ export class SoundingPlot {
 
       const temp = this.tmin + (x - (this.plotHeight - y) * Math.sin(Math.PI * this.skew/180)) / this.rT;
       informationBox.innerHTML += temp.toFixed(0) + '&deg;C';
+
+      this.observers.forEach(fn => fn(pres));
     }
   }
 
