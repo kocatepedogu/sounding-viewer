@@ -31,7 +31,7 @@ export class SoundingTable {
     "Z",
     "T",
     "Td",
-    "Spd",
+    "km/h",
     "Dir",
     "Vec"
   ];

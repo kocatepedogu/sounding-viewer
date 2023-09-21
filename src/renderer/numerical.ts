@@ -19,6 +19,22 @@
  */
 
 /**
+ * Composite Simpson's Rule
+ */
+export function integrate(f: (x: number) => number, a: number, b: number, m: number) {
+  const h = (b - a) / (2 * m);
+  let sum = f(a) + f(b);
+  for (let i = 1; i <= m; i++) {
+    sum += 4 * f(a + h * (2*i - 1));
+  }
+  for (let i = 1; i <= m - 1; i++) {
+    sum += 2 * f(a + h * (2*i));
+  }
+
+  return (h / 3) * sum;
+}
+
+/**
  * @param u-component of wind
  * @param v-component of wind
  * @returns Wind direction in degrees
@@ -35,6 +51,18 @@ export function windDirection(u:number, v:number): number {
  */
 export function windSpeed(u:number, v:number): number {
   return Math.sqrt(u**2 + v**2);
+}
+
+/**
+ * @param wspd: Wind speed
+ * @param wdir: Wind direction in degrees
+ * @returns Wind vector as [number, number] tuple. Components have the same unit as wspd
+ */
+export function windVector(wspd: number, wdir: number) {
+  const u = wspd * Math.cos(-(wdir + 90) * Math.PI / 180);
+  const v = wspd * Math.sin(-(wdir + 90) * Math.PI / 180);
+
+  return <[number, number]>[u, v];
 }
 
 /** 
@@ -237,20 +265,11 @@ export function hypsometricEquation(
   fTd: (P: number) => number) {
     const Rd = 287; // Specific gas constant of dry air (J/(kg*K))
     const g0 = 9.8076; // Gravitational acceleration (m/s^2)
-    
-    let p = Pbottom;
-    const dp = 0.2;
-    let Z = 0;
-    while (p >= Ptop) {
-      const T = fT(p);
-      const Td = fTd(p);
-      const TV = virtualTemperature(T, Td, p) + 273.15;
 
-      Z += (Rd/g0) * TV * dp/p;
-      p -= dp;
-    }
-
-    return Z;
+    return integrate((p) => {
+      const TV = virtualTemperature(fT(p), fTd(p), p) + 273.15;
+      return (Rd/g0) * TV / p;
+    }, Ptop, Pbottom, 10);
 }
 
 /**
@@ -280,7 +299,7 @@ export function moistAdiabaticLapseRate(T: number, P: number): number {
  * @param Pend Iteration finishes when the pressure reaches this value (mb/hPa)
  * @param deltaP Pressure increment used in the iteration (mb/hPa)
  */
-export function* liftSaturatedParcel(Tinitial: number, Pinitial: number, Pend: number, deltaP=5) {
+export function* liftSaturatedParcel(Tinitial: number, Pinitial: number, Pend: number, deltaP=2) {
   let P = Pinitial;
   let T = Tinitial;
   
@@ -304,7 +323,7 @@ export function* liftSaturatedParcel(Tinitial: number, Pinitial: number, Pend: n
  * @param Pend Iteration finishes when the pressure reaches this value (mb/hPa)
  * @param deltaP Pressure decrement used in the iteration (mb/hPa)
  */
-export function* liftDryParcel(Tinitial: number, Pinitial: number, Pend: number, deltaP=5) {
+export function* liftDryParcel(Tinitial: number, Pinitial: number, Pend: number, deltaP=2) {
   const TK = Tinitial + 273.15;
 
   let P = Pinitial;
@@ -325,7 +344,7 @@ export function* liftDryParcel(Tinitial: number, Pinitial: number, Pend: number,
  * @param LCL Pressure of the lifted condensation level (mb/hPa)
  * @param deltaP Pressure decrement used in the iteration (mb/hPa)
  */
-export function* liftParcel(Tinitial: number, Pinitial: number, Pend: number, LCL: number, deltaP=5) {
+export function* liftParcel(Tinitial: number, Pinitial: number, Pend: number, LCL: number, deltaP=2) {
   let lastT = NaN;
   for (const [P, T] of liftDryParcel(Tinitial, Pinitial, LCL, deltaP)) {
     lastT = T;
@@ -340,13 +359,26 @@ export function* liftParcel(Tinitial: number, Pinitial: number, Pend: number, LC
  */
 export type ValueAccessor = (p: number) => number;
 
+/**
+ * Returns a vector from the sounding data where height is equal to h.
+ */
+export type VectorAccessor = (h: number) => number[];
+
 /** Computes Convective Available Potential Energy */
 export function computeCAPE(fT: ValueAccessor, fTd: ValueAccessor, Pbegin: number, Pend: number, Pstep: number = 1) {
+  const usePressure = false;
   const R = 287;
+  const g = 9.8076;
   const LCL = liftedCondensationLevel(Pbegin, fT(Pbegin), fTd(Pbegin)); // LCL (mb/hPa)
 
   let CAPE = 0;
+  let CIN = 0;
+  let currentCIN = 0;
+  let LFC = NaN;
+  let EL = NaN;
+
   let prevPressure = Pbegin;
+  let positive = false;
   for (const [P, Tp] of liftParcel(fT(Pbegin), Pbegin, Pend, LCL, Pstep)) {
     if (P < Pend) {
       break;
@@ -357,15 +389,44 @@ export function computeCAPE(fT: ValueAccessor, fTd: ValueAccessor, Pbegin: numbe
     const Tv = virtualTemperature(T, Td, P);
 
     const Tdp = P >= LCL ? Tp : Td;
-    const Tvp = virtualTemperature(Tp, Tdp, P);
+    const Tvp = virtualTemperature(Tp, Tdp, P); 
 
-    const newCAPE = R * (Tvp - Tv) * (Math.log(prevPressure) - Math.log(P));
+    const newCAPE = (()=>{
+      if (usePressure) {
+        return R * (Tp - T) * (Math.log(prevPressure) - Math.log(P));
+      } else {
+        return g * ((Tvp - Tv)/(Tv + 273.15)) * hypsometricEquation(prevPressure, P, fT, fTd);
+      }
+    })();
 
-    CAPE += newCAPE > 0 ? newCAPE : 0;
+    if (newCAPE > 0) {
+      CAPE += newCAPE;
+
+      /* Highest level that Tp-T changes sign from negative to positive is returned as LFC. */
+      if (!positive) { 
+        LFC = P;
+      }
+
+      positive = true;
+    }
+
+    if (newCAPE < 0) {
+      currentCIN += newCAPE;
+
+      /* Addition to CIN only happens when a negative layer is followed by a positive layer
+       * so that the negative area above EL is not included in the result. */
+      if (positive) {
+        EL = P;
+        CIN = currentCIN;
+      }
+
+      positive = false;
+    }
+
     prevPressure = P;
   }
 
-  return CAPE;
+  return <[number, number, number,number]>[CAPE, CIN, LFC, EL];
 }
 
 /** Computes Lifted Index */
@@ -487,4 +548,185 @@ export function computePII(fT: ValueAccessor, fTd: ValueAccessor, fZ: ValueAcces
 /** Computes Humidity Index */
 export function computeHumidityIndex(fT: ValueAccessor, fTd: ValueAccessor) {
   return (fT(850)-fTd(850)) + (fT(700)-fTd(700)) + (fT(500)-fTd(500));
+}
+
+/** 
+ * Computes wind shear between two height levels 
+ * @returns Wind shear in km/h
+ */
+ export function computeShear(fnWind: VectorAccessor, zBegin: number, zEnd: number) {
+  const [uBegin, vBegin] = fnWind(zBegin);
+  const [uEnd, vEnd] = fnWind(zEnd);
+
+  return Math.sqrt((uEnd-uBegin)**2 + (vEnd-vBegin)**2);
+}
+
+/** Computes non-pressure-weighted mean wind between two height levels (in km/h) */
+export function computeMeanWind(fnWind: VectorAccessor, begin: number, end: number) {
+  let umean = 0;
+  let vmean = 0;
+  let count = 0;
+  for (let z = begin; z < end; z += 100) {
+    const [u, v] = fnWind(z);
+    umean += u;
+    vmean += v;
+    count++;
+  }
+
+  umean /= count;
+  vmean /= count;
+
+  return <[number, number]>[umean, vmean];
+}
+
+/** 
+ * Computes Bunkers Storm Motion  
+ * @param direction 1 for right moving supercell, -1 for left moving supercell. Default is right.
+ * @returns [wind speed in km/h, wind direction in degrees]
+ */
+export function computeSTM(fnWind: VectorAccessor, zBegin: number, direction = 1) {
+  // 0-6 km mean wind 
+  const [umean_0_6000, vmean_0_6000] = computeMeanWind(fnWind, zBegin + 0, zBegin + 6000);
+
+  // 0-0.5 km mean wind
+  const [umean_0_500, vmean_0_500] = computeMeanWind(fnWind, zBegin + 0, zBegin + 500);
+
+  // 5.5-6 km mean wind
+  const [umean_5000_6000, vmean_5000_6000] = computeMeanWind(fnWind, zBegin + 5500, zBegin + 6000);
+
+  // 0-0.5 to 5.5-6 km vertical wind shear vector
+  const shear = [umean_5000_6000 - umean_0_500, vmean_5000_6000 - vmean_0_500];
+  const magShear = Math.sqrt(shear[0]**2 + shear[1]**2);
+  const unitShear = [shear[0]/magShear, shear[1]/magShear];
+
+  // Magnitude of deviation of the supercell motion from the mean wind
+  // Multiplied with 3.6 to convert km/h
+  const D = 7.5 * 3.6;
+
+  // Deviation D * (k x Vshear / |Vshear|) where x denotes cross product, k denotes unit vector
+  const deviation =  [direction * D * unitShear[1], -direction * D * unitShear[0]];
+
+  // Storm motion
+  const stm = [umean_0_6000 + deviation[0], vmean_0_6000 + deviation[1]];
+
+  // Storm motion direction
+  const stmDir = windDirection(stm[0], stm[1]);
+  const stmSpd = windSpeed(stm[0], stm[1]); // Final result is in knots
+
+  return <[number, number]>[stmSpd, stmDir];
+}
+
+/**
+ * Computes Storm Relative Helicity using right moving Bunkers Storm Motion as storm translation velocity
+ * Result is in m^2/s^2
+ */
+export function computeSREH(fnWind: VectorAccessor, zBegin: number, zEnd: number, step=10) {
+  const [stmSpd, stmDir] = computeSTM(fnWind, zBegin);
+  const [Cx, Cy] = windVector(stmSpd/3.6, stmDir);
+
+  let SReH = 0;
+  const oV = fnWind(zBegin);
+  let [oVx, oVy] = [oV[0]/3.6, oV[1]/3.6];
+  for (let h = zBegin + step; h < zEnd; h += step) {
+    const V = fnWind(h);
+    const [Vx, Vy] = [V[0]/3.6, V[1]/3.6];
+    const [dVx, dVy] = [Vx - oVx, Vy - oVy]
+    const xy = (Cx - Vx) * dVy;
+    const yx = (Vy - Cy) * dVx;
+
+    SReH += xy + yx;
+    oVx = Vx, oVy = Vy;
+  }
+
+  return SReH;
+}
+
+/**
+ * Computes Energy Helicity Index
+ */
+export function computeEHI(fZ: ValueAccessor, fT: ValueAccessor, fTd: ValueAccessor, fnWind: VectorAccessor, 
+                           Pbegin: number, Pend: number, Zend: number) {
+  const CAPE = computeCAPE(fT, fTd, Pbegin, Pend);
+  const SREH = computeSREH(fnWind, fZ(Pbegin), fZ(Pbegin) + Zend);
+  return CAPE[0] * SREH / 160e3;
+}
+
+/**
+ * Computes SWEAT Index
+ * http://weather.uky.edu/about_sweat.htm
+ */
+export function computeSWEAT(fT: ValueAccessor, fTd: ValueAccessor, fWspd: ValueAccessor, fWdir: ValueAccessor) {
+  const Td850 = fTd(850);
+  const T1 = Td850 > 0 ? 12 * Td850 : 0;
+
+  const TT = computeTT(fT, fTd);
+  const T2 = TT > 49 ? 20 * (TT - 49) : 0;
+
+  const Wspd850 = fWspd(850) / 1.852;
+  const T3 = 2 * Wspd850;
+
+  const Wspd500 = fWspd(500) / 1.852;
+  const T4 = Wspd500;
+
+  const Wdir850 = fWdir(850) * Math.PI / 180;
+  const Wdir500 = fWdir(500) * Math.PI / 180;
+  const S = Math.sin(Wdir500 - Wdir850);
+  const T5 = (()=>{
+    if (Wdir850 < 130 || Wdir850 > 250) return 0;
+    if (Wdir500 < 210 || Wdir500 > 310) return 0;
+    if (Wdir500 - Wdir850 < 0) return 0;
+    if (Wdir850 < 15 || Wdir500 < 15) return 0;
+    if (S < -0.2) return 0;
+    return 125 * (S + 0.2);
+  })();
+
+  return T1 + T2 + T3 + T4 + T5;
+}
+
+/**
+ * Computes effective inflow layer
+ * @returns An array of tuples. Each tuple contains the bottom and top pressures of the inflow layer.
+ */
+export function computeEffectiveInflow(fT: ValueAccessor, fTd: ValueAccessor, Pbegin: number, Pend: number) {
+  const inflowLayers: [number,number][] = [];
+
+  let currentBottom = NaN;
+  let positive = false;
+  for (let p = Pbegin; p >= Pend; p -= 2) {
+    const [CAPE, CIN] = computeCAPE(fT, fTd, p, Pend, 2);
+    
+    if (CAPE > 100 && CIN > -250) {
+      if (!positive) {
+        currentBottom = p;
+      }
+
+      positive = true;
+    } else {
+      if (positive) {
+        inflowLayers.push([currentBottom, p]);
+        currentBottom = NaN;
+      }
+
+      positive = false;
+    }
+  }
+
+  return inflowLayers;
+}
+
+/**
+ * Computes Precipitable Water in mm
+ */
+export function computePW(fTd: ValueAccessor, pBegin: number, pEnd: number) {
+  const p = 997; // Density of water kg/m^3
+  const g = 9.8076; // Gravitational acceleration m/s^2
+  const PW = (1/p*g) * integrate((p) => {
+    const dewp = fTd(p);
+    if (Number.isNaN(dewp)) {
+      return 0;
+    } else {
+      return mixingRatio(dewp, p) / 1000;
+    }
+  }, pEnd, pBegin, 2000); // PW in meters
+  return 1000 * PW; // PW in milimeters
 }

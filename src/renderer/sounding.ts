@@ -18,6 +18,8 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import * as numerical from './numerical'
+
 export interface LevelSource {
    /** Pressure in milibars (mb) */
    pressure: number;
@@ -165,7 +167,7 @@ export class Sounding implements Iterable<Level> {
 
   /** 
    * Returns the value of levels[prop] where levels[i].pressure == pressure.
-   * getValueAt(980, temp) returns temperature at 980 mb.
+   * getValueAt(980, 'temp') returns temperature at 980 mb.
    */
   getValueAt(pressure: number, prop: string): number {
     for (let i = 0; i < this.enabledLevels.length - 1; i++) {
@@ -184,6 +186,36 @@ export class Sounding implements Iterable<Level> {
     }
 
     throw new Error("Pressure cannot be reached using interpolation. Internal error.");
+  }
+
+  /**
+   * Returns wind at given height. This is a separate function because
+   * direct linear interpolation does not work for wind directions.
+   * Example: (330 + 20) / 2 = 175. The result is completely unrelated to averaged values.
+   * 
+   * This function converts wind speeds and directions to wind vectors, and then applies
+   * linear interpolation.
+   */
+  getWindAt(height: number): [number, number] {
+    const sortedLevels = Object.assign(<Level[]>[], this.enabledLevels)
+      .sort((lev1: Level, lev2:Level) => lev1.height - lev2.height);
+
+    for (let i = 0; i < sortedLevels.length - 1; i++) {
+      const currentLevel = sortedLevels[i];
+      const nextLevel = sortedLevels[i+1];
+
+      if (currentLevel.height <= height && height <= nextLevel.height) {
+        const currentWind = numerical.windVector(currentLevel.windspd, currentLevel.winddir);
+        const nextWind = numerical.windVector(nextLevel.windspd, nextLevel.winddir);
+
+        const interval = currentLevel.height - nextLevel.height;
+        const r1 = (height - nextLevel.height) / interval;
+        const r2 = (currentLevel.height - height) / interval;
+        return [r1 * currentWind[0] + r2 * nextWind[0], r1 * currentWind[1] + r2 * nextWind[1]];
+      }
+    }
+
+    throw new Error("Height cannot be reached using interpolation. Internal error.");
   }
 
   /**

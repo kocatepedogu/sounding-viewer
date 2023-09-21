@@ -75,6 +75,9 @@ export class SoundingPlot {
   private rP: number = NaN;
   private rT: number = NaN;
 
+  private dataChanged = true;
+  private effectiveInflowLayers: Array<[number,number]> = [];
+
   private functions: PlotFunction[] = [
     {func: (p: number) => {
       return this.sounding.getValueAt(p, "temp");
@@ -94,6 +97,9 @@ export class SoundingPlot {
   ];
 
   private curves: PlotCurve[] = [
+    {func: () => {this.drawEffectiveInflow();},
+    color: "yellow", id:"effectiveinflow", name: "Effective Inflow Layers", enabled: false},
+
     {func: () => {this.drawPressureLines();}, 
       color: 'lightgray', id: 'pressure', name: 'Pressure levels', enabled: true},
 
@@ -107,7 +113,7 @@ export class SoundingPlot {
       color: "brown", id:"dryadiabats", name: "Dry adiabats", enabled: false},
 
     {func: () => {this.drawParcelTemperature();},
-      color: "gray", id:"parceltemperature", name: "Parcel temperature", enabled: true}
+      color: "gray", id:"parceltemperature", name: "Parcel temperature", enabled: true},
   ];
 
   constructor(sounding: data.Sounding) {
@@ -117,6 +123,7 @@ export class SoundingPlot {
     this.determineCanvasSize();
 
     this.sounding.addObserver(() => {
+      this.dataChanged = true;
       this.update();
     });
 
@@ -269,7 +276,7 @@ export class SoundingPlot {
   private findPlotBoundaries() {
     this.plotWidth = this.width * 0.8;
     this.plotHeight = this.height * 0.9;
-    this.plotX = this.width * 0.1;
+    this.plotX = this.width * 0.10;
     this.plotY = this.height * 0.05;
     this.lastX = this.plotX + this.plotWidth - 1;
     this.lastY = this.plotY + this.plotHeight - 1;
@@ -299,8 +306,8 @@ export class SoundingPlot {
         }
       });
 
-      minT += 5;
-      maxT += 5;
+      minT += 10;
+      maxT += 10;
 
       this.tmin = Math.floor(minT);
       this.tmax = Math.ceil(maxT);
@@ -434,6 +441,27 @@ export class SoundingPlot {
     this.ctx.stroke();
 
     return LCL;
+  }
+
+  /**
+   * Computes and draws effective inflow layers. 
+   * Each layer is drawn as a yellow rectangle in the background.
+   */
+  private drawEffectiveInflow() {
+    if (this.dataChanged) {
+      const fnTemp = (p: number) => this.sounding.getValueAt(p, 'temp');
+      const fnDewp = (p: number) => this.sounding.getValueAt(p, 'dewpt');
+      this.effectiveInflowLayers = numerical.computeEffectiveInflow(fnTemp, fnDewp, 
+        this.sounding.first().pressure, this.sounding.last().pressure);
+      this.dataChanged = false;
+    }
+
+    for (const [bottom, top] of this.effectiveInflowLayers) {
+      const bottomY = this.computeCoordinates(bottom, 0)[1];
+      const topY = this.computeCoordinates(top, 0)[1];
+      this.ctx.fillStyle = "rgb(252, 251, 207)";
+      this.ctx.fillRect(this.plotX, bottomY, this.plotWidth, topY - bottomY + 1);
+    }
   }
 
   /**
