@@ -61,8 +61,6 @@ export class IndexTable {
     let MU: number = NaN;
     let MUCAPE: number = NaN;
     let MUCIN: number = NaN;
-    let MULFC: number = NaN;
-    let MUEL: number = NaN;
 
     this.indices = [
       {func: () => {
@@ -89,21 +87,12 @@ export class IndexTable {
         name: "Most unstable parcel (mb)"},
 
       {func: () => {
-        [MUCAPE, MUCIN, MULFC, MUEL] = numerical.computeCAPE(fnTemp, fnDewp, MU, pEnd());
+        [MUCAPE, MUCIN] = numerical.computeCAPE(fnTemp, fnDewp, MU, pEnd()).slice(0, 2);
         return MUCAPE;
       }, name: "MU CAPE"},
 
       {func: () => MUCIN,
         name: "MU CIN"},
-
-      {func: () => Math.sqrt(2 * MUCAPE),
-        name: "MU Maximum updraft (m/s)"},
-
-      {func: () => sounding.getValueAt(MULFC, 'height'),
-        name: "MU LFC (m)"},
-
-      {func: () => sounding.getValueAt(MUEL, 'height'),
-        name: "MU EL (m)"},
   
       {func: () => numerical.computeLiftedIndex(fnTemp, fnDewp, MU),
         name: "MU Lifted Index"},

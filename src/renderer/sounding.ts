@@ -77,13 +77,13 @@ export class Sounding implements Iterable<Level> {
     }
 
     // Fill missing data by linear interpolation
-    for (const prop of [['height',0], ['temp',2], ['dewpt',2], ['winddir',0], ['windspd',0]]) {
-      this.levels.forEach((lev) => {lev.enabled = Number.isNaN(lev[prop[0]]) ? 0 : 1;});
+    for (const prop of ['height', 'temp', 'dewpt', 'winddir', 'windspd']) {
+      this.levels.forEach((lev) => {lev.enabled = Number.isNaN(lev[prop]) ? 0 : 1;});
       this.updateEnabledLevels();
       for (const level of this.levels) {
-        if (Number.isNaN(level[<string>prop[0]])) {
+        if (Number.isNaN(level[prop])) {
           try {
-            level[prop[0]] = parseFloat(this.getValueAt(level.pressure, <string>prop[0]).toFixed(<number>prop[1]));
+            level[prop[0]] = this.getValueAt(level.pressure, <string>prop);
           } catch (e) {
             continue;
           }

@@ -177,12 +177,12 @@ export class GSD implements Iterable<sounding.LevelSource> {
 
     for (const lev of gsd.levels) {
       const newLine = lev.lineType.toString() + ' ' +
-                      (lev.pressure * 10).toFixed(2) + ' ' +
-                      (lev.height).toFixed(2) + ' ' +
-                      (lev.temp * 10).toFixed(2) + ' ' +
-                      (lev.dewpt * 10).toFixed(2) + ' ' +
-                      (lev.winddir).toFixed(0) + ' ' +
-                      (lev.windspd).toFixed(0);
+                      (lev.pressure * 10).toString() + ' ' +
+                      (lev.height).toString()  + ' ' +
+                      (lev.temp * 10).toString() + ' ' +
+                      (lev.dewpt * 10).toString() + ' ' +
+                      (lev.winddir).toString() + ' ' +
+                      (lev.windspd).toString();
 
       result += newLine + '\n';
     }

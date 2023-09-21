@@ -88,12 +88,12 @@ class GRIBData {
     const u10m = this.get(above10mLevel, GRIBValueType.WindUComponent);
     const v10m = this.get(above10mLevel, GRIBValueType.WindVComponent);
     const firstLevel: LevelSource = {
-      pressure: parseFloat((this.get(surfaceLevel, GRIBValueType.Pressure) / 100).toFixed(0)),
-      height: parseFloat((this.get(surfaceLevel, GRIBValueType.Height)).toFixed(0)),
-      temp: parseFloat((this.get(above2mLevel, GRIBValueType.Temperature) - 273.15).toFixed(2)),
-      dewpt: parseFloat((this.get(above2mLevel, GRIBValueType.Dewpoint) - 273.15).toFixed(2)),
-      winddir: parseFloat(numerical.windDirection(u10m, v10m).toFixed(0)),
-      windspd: parseFloat((numerical.windSpeed(u10m, v10m) * 3.6).toFixed(0))
+      pressure: this.get(surfaceLevel, GRIBValueType.Pressure) / 100,
+      height: this.get(surfaceLevel, GRIBValueType.Height),
+      temp: this.get(above2mLevel, GRIBValueType.Temperature) - 273.15,
+      dewpt: this.get(above2mLevel, GRIBValueType.Dewpoint) - 273.15,
+      winddir: numerical.windDirection(u10m, v10m),
+      windspd: numerical.windSpeed(u10m, v10m) * 3.6
     }
 
     /* The first level in the result is the surface level */
@@ -120,12 +120,12 @@ class GRIBData {
       const dpt = numerical.dewpointTemperature(tmp, rh);
 
       result.push({
-        pressure: parseFloat(pressureValue.toFixed(0)),
-        height: parseFloat((this.get(pressureLevel, GRIBValueType.Height)).toFixed(0)),
-        temp: parseFloat(tmp.toFixed(2)),
-        dewpt: parseFloat(dpt.toFixed(2)),
-        winddir: parseFloat(numerical.windDirection(u, v).toFixed(0)),
-        windspd: parseFloat((numerical.windSpeed(u, v) * 3.6).toFixed(0))
+        pressure: pressureValue,
+        height: this.get(pressureLevel, GRIBValueType.Height),
+        temp: tmp,
+        dewpt: dpt,
+        winddir: numerical.windDirection(u, v),
+        windspd: numerical.windSpeed(u, v) * 3.6
       });
     }
     

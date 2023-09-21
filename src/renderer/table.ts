@@ -21,20 +21,14 @@
 import * as data from "./sounding"
 
 export class SoundingTable {
+  private sounding: data.Sounding;
   private observers: Array<(lev: number) => void> = [];
   private previousActiveLevel: number;
 
   /* Level properties that will be displayed together with their titles */
   private readonly levelProperties = ["pressure", "height", "temp", "dewpt", "windspd", "winddir"];
-  private readonly levelPropertyTitles = [
-    "P",
-    "Z",
-    "T",
-    "Td",
-    "km/h",
-    "Dir",
-    "Vec"
-  ];
+  private readonly levelPropertyDigits = [0, 0, 2, 2, 1, 0];
+  private readonly levelPropertyTitles = ["P", "Z", "T", "Td", "km/h", "Dir", "Vec"];
 
   /* Currently edited cell */
   private lastEdited: HTMLDivElement | undefined = undefined;
@@ -42,8 +36,12 @@ export class SoundingTable {
   /* Closes currently edited cell */
   private closeInputBox() {
     if (this.lastEdited) {
-      const previousInput: HTMLInputElement = this.lastEdited.firstElementChild! as HTMLInputElement;
-      this.lastEdited.innerText = previousInput.value;
+      const levelprop = this.lastEdited.id.split('-');
+      const levelID = parseInt(levelprop[0]);
+      const prop = levelprop[1];
+      const propIndex = this.levelProperties.indexOf(prop);
+
+      this.lastEdited.innerText = this.sounding.find(levelID)[prop].toFixed(this.levelPropertyDigits[propIndex]);
       this.lastEdited = undefined;
     }
   }
@@ -75,9 +73,11 @@ export class SoundingTable {
       `<div class="sounding-table-data-rows" id="${level.id}">
          <div class="sounding-table-check-cells"><input type="checkbox" id="check-${level.id}" ${level.enabled ? "checked" : ""}/></div>`;
 
-    this.levelProperties.forEach(prop => { 
-      newRow += `<div class="sounding-table-data-cells" id="${level.id + '-' + prop}">${level[prop]}</div>`; 
-    });
+    for (let i = 0; i < this.levelProperties.length; i++) {
+      const prop = this.levelProperties[i];
+      const digits = this.levelPropertyDigits[i];
+      newRow += `<div class="sounding-table-data-cells" id="${level.id + '-' + prop}">${level[prop].toFixed(digits)}</div>`; 
+    }
 
     newRow += `<div class="sounding-table-wind-cells" id="${level.id + '-arrow'}">
                   <object data="../../resources/arrow.svg" width="16px" height="16px" style="transform: rotate(${(-90 + level.winddir) % 360}deg);">
@@ -102,7 +102,7 @@ export class SoundingTable {
 
       // Create a text box in the cell.
       const currentContent = targetElement.innerText;
-      targetElement.innerHTML = `<input id="sounding-table-edit" type="text" value="${currentContent}" size="${currentContent.length}">`;
+      targetElement.innerHTML = `<input id="sounding-table-edit" type="text" value="${sounding.find(targetLevel)[targetParameter]}" size="${currentContent.length}">`;
       this.lastEdited = targetElement;
       
       const inputbox: HTMLInputElement = this.lastEdited.firstElementChild! as HTMLInputElement;
@@ -202,6 +202,7 @@ export class SoundingTable {
 
   /* Fills table with given data and sets event handlers */
   constructor(sounding: data.Sounding) {
+    this.sounding = sounding;
     this.previousActiveLevel = sounding.first().pressure;
 
     /* Get sounding table element */
