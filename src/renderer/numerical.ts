@@ -444,6 +444,11 @@ export function computeK(fT: ValueAccessor, fTd: ValueAccessor) {
   return fT(850) + fTd(850) + fTd(700) - fT(700) - fT(500);
 }
 
+/** Computes Soaring Index */
+export function computeSoaring(fT: ValueAccessor, fTd: ValueAccessor) {
+  return fT(850) - fT(500) + fTd(500) - (fT(700) - fTd(700));
+}
+
 /** Computes Totals Totals */
 export function computeTT(fT: ValueAccessor, fTd: ValueAccessor) {
   return fT(850) + fTd(850) - 2*fT(500);
@@ -685,6 +690,7 @@ export function computeSWEAT(fT: ValueAccessor, fTd: ValueAccessor, fWspd: Value
 
 /**
  * Computes effective inflow layer
+ * https://www.spc.noaa.gov/help/effective.html
  * @returns An array of tuples. Each tuple contains the bottom and top pressures of the inflow layer.
  */
 export function computeEffectiveInflow(fT: ValueAccessor, fTd: ValueAccessor, Pbegin: number, Pend: number) {
@@ -692,7 +698,7 @@ export function computeEffectiveInflow(fT: ValueAccessor, fTd: ValueAccessor, Pb
 
   let currentBottom = NaN;
   let positive = false;
-  for (let p = Pbegin; p >= Pend; p -= 2) {
+  for (let p = Pbegin; p >= Pend; p -= 5) {
     const [CAPE, CIN] = computeCAPE(fT, fTd, p, Pend, 2);
     
     if (CAPE > 100 && CIN > -250) {
@@ -729,4 +735,38 @@ export function computePW(fTd: ValueAccessor, pBegin: number, pEnd: number) {
     }
   }, pEnd, pBegin, 2000); // PW in meters
   return 1000 * PW; // PW in milimeters
+}
+
+/**
+ * Computes most unstable parcel
+ */
+export function computeMostUnstable(fT: ValueAccessor, fTd: ValueAccessor, pBegin: number, pEnd: number) {
+  let largest = Number.MIN_VALUE;
+  let level = NaN;
+  for (let p = pBegin; p >= pEnd; p -= 5) {
+    const thetae = equivalentPotentialTemperature(fT(p), fTd(p), p);
+    if (thetae > largest) {
+      largest = thetae;
+      level = p;
+    }
+  }
+
+  return level;
+}
+
+/**
+ * Computes Supercell Composite Parameter
+ * https://www.spc.noaa.gov/help/scp.html
+ * https://www.spc.noaa.gov/exper/mesoanalysis/help/help_scp.html
+ */
+export function computeSCP(fWind: VectorAccessor, zBegin: number, zEnd: number, MUCAPE: number) {
+  const effectiveSREH = computeSREH(fWind, zBegin, zEnd);
+  const effectiveShear = computeShear(fWind, zBegin, zEnd) / 3.6;
+  const shearTerm = (()=>{
+    if (effectiveShear < 10) return 0;
+    if (effectiveShear > 30) return 1.5;
+    return effectiveShear / 20;
+  })();
+
+  return (MUCAPE / 1000) * (effectiveSREH / 50) * shearTerm;
 }

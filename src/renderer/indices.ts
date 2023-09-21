@@ -58,26 +58,55 @@ export class IndexTable {
 
     let inflow: [number, number] = [NaN, NaN];
 
+    let MU: number = NaN;
+    let MUCAPE: number = NaN;
+    let MUCIN: number = NaN;
+    let MULFC: number = NaN;
+    let MUEL: number = NaN;
+
     this.indices = [
       {func: () => {
         [CAPE, CIN, LFC, EL] = numerical.computeCAPE(fnTemp, fnDewp, pBegin(), pEnd());
         return CAPE;
-      }, name: "CAPE"},
+      }, name: "SFC CAPE"},
 
       {func: () => CIN,
-        name: "CIN"},
+        name: "SFC CIN"},
 
       {func: () => Math.sqrt(2 * CAPE),
-        name: "Maximum updraft (m/s)"},
+        name: "SFC Maximum updraft (m/s)"},
 
       {func: () => sounding.getValueAt(LFC, 'height'),
-        name: "Level of Free Convection"},
+        name: "SFC LFC (m)" },
 
       {func: () => sounding.getValueAt(EL, 'height'),
-        name: "Equilibrium Level"},
+        name: "SFC EL (m)"},
   
       {func: () => numerical.computeLiftedIndex(fnTemp, fnDewp, pBegin()),
-        name: "Lifted Index"},
+        name: "SFC Lifted Index"},
+
+      {func: () => {return MU = numerical.computeMostUnstable(fnTemp, fnDewp, pBegin(), 500)},
+        name: "Most unstable parcel (mb)"},
+
+      {func: () => {
+        [MUCAPE, MUCIN, MULFC, MUEL] = numerical.computeCAPE(fnTemp, fnDewp, MU, pEnd());
+        return MUCAPE;
+      }, name: "MU CAPE"},
+
+      {func: () => MUCIN,
+        name: "MU CIN"},
+
+      {func: () => Math.sqrt(2 * MUCAPE),
+        name: "MU Maximum updraft (m/s)"},
+
+      {func: () => sounding.getValueAt(MULFC, 'height'),
+        name: "MU LFC (m)"},
+
+      {func: () => sounding.getValueAt(MUEL, 'height'),
+        name: "MU EL (m)"},
+  
+      {func: () => numerical.computeLiftedIndex(fnTemp, fnDewp, MU),
+        name: "MU Lifted Index"},
 
       {func: () => numerical.computePW(fnDewp, pBegin(), pEnd()),
         name: "Precipitable Water"},
@@ -87,6 +116,9 @@ export class IndexTable {
   
       {func: () => numerical.computeTT(fnTemp, fnDewp), 
         name: "Totals Totals"},
+
+      {func: () => numerical.computeSoaring(fnTemp, fnDewp), 
+        name: "Soaring Index"},
   
       {func: () => numerical.computeBoyden(fnTemp, fnHeight), 
         name: "Boyden Index"},
@@ -193,7 +225,10 @@ export class IndexTable {
         name: "Energy Helicity Index Inflow"},
 
       {func: () => numerical.computeSWEAT(fnTemp, fnDewp, fnSpd, fnDir),
-        name: "SWEAT Index"}
+        name: "SWEAT Index"},
+
+      {func: () => numerical.computeSCP(fnWind, inflow![0], inflow![1], MUCAPE),
+        name: "SCP"},
     ];
   }
 
