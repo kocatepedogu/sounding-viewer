@@ -18,141 +18,237 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as data from "./sounding"
+import * as sounding from "./sounding"
 
 export class SoundingTable {
-  private sounding: data.Sounding;
+  private sounding: sounding.Sounding;
+  private table: HTMLElement;
   private observers: Array<(lev: number) => void> = [];
   private previousActiveLevel: number;
 
-  /* Level properties that will be displayed together with their titles */
-  private readonly levelProperties = ["pressure", "height", "temp", "dewpt", "windspd", "winddir"];
-  private readonly levelPropertyDigits = [0, 0, 2, 2, 1, 0];
-  private readonly levelPropertyTitles = ["P", "Z", "T", "Td", "km/h", "Dir", "Vec"];
+  private static readonly properties = [
+    {name: 'pressure', precision: 0, title: 'P'},
+    {name: 'height', precision: 0, title: 'Z'},
+    {name: 'temp', precision: 2, title: 'T'},
+    {name: 'dewpt', precision: 2, title: 'Td'},
+    {name: 'windspd', precision: 1, title: 'km/h'},
+    {name: 'winddir', precision: 0, title: 'Dir'}
+  ];
 
   /* Currently edited cell */
-  private lastEdited: HTMLDivElement | undefined = undefined;
+  private lastEdited: HTMLDivElement|undefined;
 
-  /* Closes currently edited cell */
+  /* Table context menu */
+  private contextMenu!: HTMLDivElement;
+  private choosenLevel!: number;
+
+  constructor(sounding: sounding.Sounding) {
+    this.sounding = sounding;
+    this.previousActiveLevel = sounding.first().pressure;
+
+    const table = document.getElementById('sounding-table');
+    if (!table) {
+      throw new Error("Sounding table does not exist.")
+    }
+
+    this.table = table;
+
+    this.constructContextMenu();
+    this.constructTitle();
+    this.constructBody();
+    this.constructEvents();
+  }
+
+  /** Adds a callback function that gets called when the active level is changed */
+  addObserver(fncallback: (lev: number) => void) {
+    this.observers.push(fncallback);
+  }
+
+  private constructContextMenu() {
+    this.contextMenu = document.getElementById('sounding-table-menu')! as HTMLDivElement;
+    this.choosenLevel = NaN;
+  }
+
+  private constructTitle() {
+    const tableTitle = document.createElement('div');
+    tableTitle.id = 'sounding-table-title';
+
+    const checkColumn = document.createElement('div');
+    checkColumn.className = 'sounding-table-title-column';
+    tableTitle.appendChild(checkColumn);
+
+    for (const property of SoundingTable.properties) {
+      const labelColumn = document.createElement('div');
+      labelColumn.className = 'sounding-table-title-column';
+      labelColumn.textContent = property.title;
+      tableTitle.appendChild(labelColumn);
+    }
+
+    this.table.appendChild(tableTitle);
+  }
+
+  private constructBody() {
+    const tableBody = document.createElement('div');
+    tableBody.id = 'sounding-table-body';
+    for (const level of this.sounding.levels) {
+      tableBody.appendChild(this.generateRow(level));
+    }
+
+    this.table.appendChild(tableBody);
+  }
+
+  private constructEvents() {
+    this.contextMenu.addEventListener('click', 
+      (event) => {this.contextMenuClickHandler(event);});
+    this.contextMenu.addEventListener('contextmenu',
+      (event) => {this.contextMenuClickHandler(event);});
+
+    this.table.addEventListener('click',
+      (event) => {this.tableLeftClickHandler(event);});
+    this.table.addEventListener('contextmenu',
+      (event) => {this.tableRightClickHandler(event);});
+    this.table.addEventListener('mousemove',
+      (event) => {this.mouseMoveHandler(event);});
+  }
+
   private closeInputBox() {
     if (this.lastEdited) {
       const levelprop = this.lastEdited.id.split('-');
       const levelID = parseInt(levelprop[0]);
-      const prop = levelprop[1];
-      const propIndex = this.levelProperties.indexOf(prop);
+      const propName = levelprop[1];
+      const prop = SoundingTable.properties.find(property => property.name == propName);
 
-      this.lastEdited.innerText = this.sounding.find(levelID)[prop].toFixed(this.levelPropertyDigits[propIndex]);
+      this.lastEdited.innerText = this.sounding.find(levelID)[propName].toFixed(prop?.precision);
       this.lastEdited = undefined;
     }
   }
 
-  /* Table context menu */
-  private contextMenu: HTMLDivElement = document.getElementById('sounding-table-menu')! as HTMLDivElement;
-  private choosenLevel: number = -1;
-
-  /* Closes context menu */
   private closeContextMenu() {
     const choosenLevelValue = this.choosenLevel;
-    if (choosenLevelValue != -1) {
-      /* Remove highlight from the selected row */
+    if (!Number.isNaN(choosenLevelValue)) {
       const choosenRow: HTMLElement = document.getElementById(choosenLevelValue.toString()) as HTMLElement;
-      if (choosenRow != undefined) { // Check if the row has been deleted.
+      if (choosenRow != undefined) {
         choosenRow.removeAttribute('style');
       }
 
-      this.choosenLevel = -1;
-
-      /* Make context menu hidden */
+      this.choosenLevel = NaN;
       this.contextMenu.style.visibility = "hidden";
     }
   }
 
-  /* Generates HTML code for single a row */
-  private generateRowCode(level: data.Level) {
-    let newRow = 
-      `<div class="sounding-table-data-rows" id="${level.id}">
-         <div class="sounding-table-check-cells"><input type="checkbox" id="check-${level.id}" ${level.enabled ? "checked" : ""}/></div>`;
+  private generateRow(level: sounding.Level) {
+    const dataRow = document.createElement('div');
+    dataRow.className = 'sounding-table-data-rows';
+    dataRow.id = level.id.toString();
 
-    for (let i = 0; i < this.levelProperties.length; i++) {
-      const prop = this.levelProperties[i];
-      const digits = this.levelPropertyDigits[i];
-      newRow += `<div class="sounding-table-data-cells" id="${level.id + '-' + prop}">${level[prop].toFixed(digits)}</div>`; 
+    const checkBoxCell = document.createElement('div');
+    checkBoxCell.className = 'sounding-table-check-cells';
+    dataRow.appendChild(checkBoxCell);
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = 'check-' + level.id.toString();
+    checkbox.checked = level.enabled ? true : false;
+    checkBoxCell.appendChild(checkbox);
+
+    for (const property of SoundingTable.properties) {
+      const dataCell = document.createElement('div');
+      dataCell.className = 'sounding-table-data-cells';
+      dataCell.id = level.id.toString() + '-' + property.name;
+      dataCell.textContent = level[property.name].toFixed(property.precision);
+      dataRow.appendChild(dataCell);
     }
 
-    newRow += `<div class="sounding-table-wind-cells" id="${level.id + '-arrow'}">
-                  <object data="../../resources/arrow.svg" width="16px" height="16px" style="transform: rotate(${(-90 + level.winddir) % 360}deg);">
-                  </object>
-               </div>`;
+    const windCell = document.createElement('div');
+    windCell.className = 'sounding-table-wind-cells';
+    windCell.id = level.id.toString() + '-arrow';
+    dataRow.appendChild(windCell);
 
-    return newRow + `</div>`;
+    const windArrow = document.createElement('object');
+    windArrow.data = '../../resources/arrow.svg';
+    windArrow.width = '16px';
+    windArrow.height = '16px';
+    windArrow.style.transform = `rotate(${(-90 + level.winddir) % 360}deg)`
+    windCell.appendChild(windArrow);
+
+    return dataRow;
   }
 
-  private tableLeftClickHandler(event: MouseEvent, sounding: data.Sounding) {
+  private tableLeftClickHandler(event: MouseEvent) {
     this.closeContextMenu();
 
     const targetElement = event.target as HTMLElement;
-    
     if (targetElement instanceof HTMLDivElement && targetElement.className == "sounding-table-data-cells") {
-      const target = targetElement.id.split('-');
-      const targetLevel = parseInt(target[0])
-      const targetParameter = target[1];
-
-      // If there is a currently edited cell, close it.
-      this.closeInputBox();
-
-      // Create a text box in the cell.
-      const currentContent = targetElement.innerText;
-      targetElement.innerHTML = `<input id="sounding-table-edit" type="text" value="${sounding.find(targetLevel)[targetParameter]}" size="${currentContent.length}">`;
-      this.lastEdited = targetElement;
-      
-      const inputbox: HTMLInputElement = this.lastEdited.firstElementChild! as HTMLInputElement;
-
-      // Change sounding data as soon as user changes text box contents.
-      inputbox.addEventListener('input', () => {
-        const newValue = parseFloat(inputbox.value);
-        sounding.changeAttribute(targetLevel, targetParameter, newValue);
-      });
-
-      // Close the text box when user presses the enter key.
-      inputbox.addEventListener('keydown', (event) => {
-        if (event.key == "Enter") this.closeInputBox();
-      });
+      this.dataCellLeftClickHandler(targetElement);
     }
-
-    if (targetElement instanceof HTMLInputElement) {
-      const inputElement: HTMLInputElement = targetElement;
-      if (inputElement.type == "checkbox") {
-        const target = targetElement.id.split('-');
-        const targetLevel = parseInt(target[1]);
-
-        if (inputElement.checked) {
-          sounding.enableLevel(targetLevel);
-        } else {
-          sounding.disableLevel(targetLevel);
-        }
+    else if (targetElement instanceof HTMLInputElement) {
+      if (targetElement.type == "checkbox") {
+        this.checkboxLeftClickHandler(targetElement);
       }
+    }
+  }
+
+  private dataCellLeftClickHandler(targetElement: HTMLDivElement) {
+    const target = targetElement.id.split('-');
+    const targetLevel = parseInt(target[0])
+    const targetParameter = target[1];
+
+    // If there is a currently edited cell, close it.
+    this.closeInputBox();
+
+    // Create a text box in the cell.
+    const textbox = document.createElement('input');
+    textbox.id = 'sounding-table-edit';
+    textbox.type = 'text';
+    textbox.value = this.sounding.find(targetLevel)[targetParameter].toString();
+    textbox.size = (targetElement.textContent || '').length;
+    targetElement.replaceChildren(textbox);
+    this.lastEdited = targetElement;
+    
+    const inputbox: HTMLInputElement = this.lastEdited.firstElementChild! as HTMLInputElement;
+
+    // Change sounding data as soon as user changes text box contents.
+    inputbox.addEventListener('input', () => {
+      const newValue = parseFloat(inputbox.value);
+      this.sounding.changeAttribute(targetLevel, targetParameter, newValue);
+    });
+
+    // Close the text box when user presses the enter key.
+    inputbox.addEventListener('keydown', (event) => {
+      if (event.key == "Enter") this.closeInputBox();
+    });
+  }
+
+  private checkboxLeftClickHandler(targetElement: HTMLInputElement) {
+    const target = targetElement.id.split('-');
+    const targetLevel = parseInt(target[1]);
+
+    if (targetElement.checked) {
+      this.sounding.enableLevel(targetLevel);
+    } else {
+      this.sounding.disableLevel(targetLevel);
     }
   }
 
   private tableRightClickHandler(event: MouseEvent) {
     this.closeContextMenu();
 
-    /* Find the row that generated the right click event */
+    // Find the row that generated the right click event
     const targetElement = event.target as HTMLElement;
 
-    /* Ignore right clicks on the title */
+    // Ignore right clicks on the title
     if (targetElement.className == "sounding-table-title-column") return;
 
     const targetPosition = targetElement.id.split('-');
     const newChoosenLevel = targetPosition[0];
 
     if (targetElement instanceof HTMLDivElement) {
-      /* Make context menu visible */
+      // Make context menu visible
       this.contextMenu.style.top = `${event.y}px`;
       this.contextMenu.style.left = `${event.x}px`;
       this.contextMenu.style.visibility = 'visible';
 
-      /* Highlight the selected row */
+      // Highlight the selected row
       const choosenRow: HTMLElement = document.getElementById(newChoosenLevel) as HTMLElement;
       choosenRow.style.backgroundColor = "gray";
       this.choosenLevel = parseInt(newChoosenLevel);
@@ -162,24 +258,24 @@ export class SoundingTable {
     }
   }
 
-  private contextMenuClickHandler(event: MouseEvent, sounding: data.Sounding) {
+  private contextMenuClickHandler(event: MouseEvent) {
     const option: HTMLElement = event.target as HTMLElement;
     switch (option.id) {
       case 'sounding-table-menu-delete': {
-        sounding.delete(this.choosenLevel);
+        this.sounding.delete(this.choosenLevel);
         document.getElementById(this.choosenLevel.toString())!.remove();
         break;
       }
       case 'sounding-table-menu-insert-above': {
-        const newLevel = sounding.insertAbove(this.choosenLevel);
+        const newLevel = this.sounding.insertAbove(this.choosenLevel);
         const currentRow = document.getElementById(this.choosenLevel.toString());
-        currentRow?.insertAdjacentHTML('beforebegin', this.generateRowCode(newLevel));
+        currentRow?.insertAdjacentElement('beforebegin', this.generateRow(newLevel));
         break;
       }
       case 'sounding-table-menu-insert-below': {
-        const newLevel = sounding.insertBelow(this.choosenLevel);
+        const newLevel = this.sounding.insertBelow(this.choosenLevel);
         const currentRow = document.getElementById(this.choosenLevel.toString());
-        currentRow?.insertAdjacentHTML('afterend', this.generateRowCode(newLevel));
+        currentRow?.insertAdjacentElement('afterend', this.generateRow(newLevel));
         break;
       }
     }
@@ -188,54 +284,15 @@ export class SoundingTable {
     event.preventDefault();
   }
 
-  private mouseMoveHandler(event: MouseEvent, sounding: data.Sounding) {
+  private mouseMoveHandler(event: MouseEvent) {
     const targetElement = event.target as HTMLElement;
     if (targetElement.className == 'sounding-table-data-cells') {  
       const id = parseInt(targetElement.id.split('-')[0]);
-      const level = sounding.find(id);
+      const level = this.sounding.find(id);
       if (this.previousActiveLevel != level.pressure) {
         this.observers.forEach(fn => fn(level.pressure));
         this.previousActiveLevel = level.pressure;
       }
     }
-  }
-
-  /* Fills table with given data and sets event handlers */
-  constructor(sounding: data.Sounding) {
-    this.sounding = sounding;
-    this.previousActiveLevel = sounding.first().pressure;
-
-    /* Get sounding table element */
-    const soundingTable = document.getElementById('sounding-table');
-    if (!soundingTable) {
-      throw new Error("Sounding table does not exist.")
-    }
-
-    /* Display header of the table */
-    let tableHead = '<div id="sounding-table-title"><div class="sounding-table-title-column"></div>';
-    this.levelPropertyTitles.forEach((title) => {tableHead += `<div class="sounding-table-title-column">${title}</div>`});
-    tableHead += "</div>";
-
-    /* Display levels */
-    let tableBody = '<div id="sounding-table-body">';
-    for (const level of sounding.levels) {
-      tableBody += this.generateRowCode(level);
-    }
-
-    soundingTable.innerHTML = tableHead + tableBody + '</div>';
-
-    /* Event handlers of context menu */
-    this.contextMenu.addEventListener('click', (event) => {this.contextMenuClickHandler(event, sounding);});
-    this.contextMenu.addEventListener('contextmenu', (event) => {this.contextMenuClickHandler(event, sounding);});
-
-    /* Event handlers of table */
-    soundingTable.addEventListener('click', (event) => {this.tableLeftClickHandler(event, sounding);});
-    soundingTable.addEventListener('contextmenu', (event) => {this.tableRightClickHandler(event);});
-    soundingTable.addEventListener('mousemove', (event) => {this.mouseMoveHandler(event, sounding);});
-  }
-
-  /** Adds a callback function that gets called when the active level is changed */
-  addObserver(fncallback: (lev: number) => void) {
-    this.observers.push(fncallback);
   }
 }
