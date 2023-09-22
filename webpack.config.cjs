@@ -24,7 +24,7 @@ let common = {
   },
   output: {
     libraryTarget: 'var',
-    library: 'bundle',
+    library: 'vaporPressure',
   }
 }
 

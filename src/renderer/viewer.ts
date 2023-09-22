@@ -87,53 +87,55 @@ function setTitle() {
     `${modelName} ${lat},${lon} ${hour}h`;
 }
 
-window.initializeSounding = async function() {
-  const src = await (async () => {
-    try {
-      return await getData();
-    } catch (err) {
-      if (err instanceof Error) {
-        alert(err.message);
+if (typeof window !== 'undefined') {
+  window.initializeSounding = async function() {
+    const src = await (async () => {
+      try {
+        return await getData();
+      } catch (err) {
+        if (err instanceof Error) {
+          alert(err.message);
+        }
+
+        location.assign('./index.html');
+        throw err;
       }
+    })();
 
-      location.assign('./index.html');
-      throw err;
-    }
-  })();
+    setTitle();
+    
+    const snd = new sounding.Sounding(src);
+    const plt = new diagram.SoundingPlot(snd);
+    const hod = new Hodograph(snd);
+    const ind = new indices.IndexTable(snd);
+    const tbl = new table.SoundingTable(snd);
+    const det = new levelDetails.LevelDetails(snd);
 
-  setTitle();
-  
-  const snd = new sounding.Sounding(src);
-  const plt = new diagram.SoundingPlot(snd);
-  const hod = new Hodograph(snd);
-  const ind = new indices.IndexTable(snd);
-  const tbl = new table.SoundingTable(snd);
-  const det = new levelDetails.LevelDetails(snd);
+    plt.addObserver((lev) => det.setLevel(lev));
+    tbl.addObserver((lev) => det.setLevel(lev));
+    plt.update();
+    ind.update();
+    hod.update();
 
-  plt.addObserver((lev) => det.setLevel(lev));
-  tbl.addObserver((lev) => det.setLevel(lev));
-  plt.update();
-  ind.update();
-  hod.update();
+    new Dialog("sounding-diagram-settings");
+    new Dialog("sounding-level-details");
+    new Dialog("hodograph");
 
-  new Dialog("sounding-diagram-settings");
-  new Dialog("sounding-level-details");
-  new Dialog("hodograph");
+    document.getElementById('export-btn')?.addEventListener('click', () => {
+      exportData(snd);
+    });
 
-  document.getElementById('export-btn')?.addEventListener('click', () => {
-    exportData(snd);
-  });
+    document.getElementById('level-details-btn')?.addEventListener('click', () => {
+      const levelDetailsDialog = document.getElementById('sounding-level-details')!;
+      levelDetailsDialog.hidden = false;
+    })
 
-  document.getElementById('level-details-btn')?.addEventListener('click', () => {
-    const levelDetailsDialog = document.getElementById('sounding-level-details')!;
-    levelDetailsDialog.hidden = false;
-  })
+    document.getElementById('hodograph-btn')?.addEventListener('click', () => {
+      const hodographDialog = document.getElementById('hodograph')!;
+      hodographDialog.hidden = false;
+    });
 
-  document.getElementById('hodograph-btn')?.addEventListener('click', () => {
-    const hodographDialog = document.getElementById('hodograph')!;
-    hodographDialog.hidden = false;
-  });
-
-  document.getElementById('main-div')!.style.visibility = "visible";
-  document.getElementById('loading-div')!.style.visibility = "hidden";
+    document.getElementById('main-div')!.style.visibility = "visible";
+    document.getElementById('loading-div')!.style.visibility = "hidden";
+  }
 }

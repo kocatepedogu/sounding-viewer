@@ -320,7 +320,9 @@ export class Options {
   }
 }
 
-window.initializeMapAndOptions = function () {
-  const map = new LocationMap();
-  new Options(map);
+if (typeof window !== 'undefined') {
+  window.initializeMapAndOptions = function () {
+    const map = new LocationMap();
+    new Options(map);
+  }
 }

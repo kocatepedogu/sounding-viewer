@@ -19,18 +19,63 @@
  */
 
 import * as data from "./sounding"
-import * as numerical from "./numerical"
 
 type SoundingIndex = {
-  /** func takes the sounding as argument and returns an index value */
-  func: (sounding: data.Sounding) => number;
-  /** Name gets printed as the label of the index */
+  id: string;
   name: string;
 }
 
 export class IndexTable {
+  private worker!: Worker;
   private sounding: data.Sounding;
-  private indices: SoundingIndex[];
+  private indices: SoundingIndex[] = [
+    { id: "sfc-cape", name: "SFC CAPE" },
+    { id: "sfc-cin", name: "SFC CIN" },
+    { id: "sfc-updraft", name: "SFC Maximum updraft (m/s)" },
+    { id: "sfc-lfc", name: "SFC LFC (m)" },
+    { id: "sfc-el", name: "SFC EL (m)" },
+    { id: "sfc-lftx", name: "SFC Lifted Index" },
+    { id: "mu-parcel", name: 'Most unstable parcel (mb)'},
+    { id: "mu-cape", name: 'MU CAPE'},
+    { id: "mu-cin", name: 'MU CIN'},
+    { id: "mu-lftx", name: 'MU Lifted Index'},
+    { id: "pw", name: 'Precipitable Water'},
+    { id: "k", name: 'K Index'},
+    { id: "tt", name: 'Totals Totals'},
+    { id: "soaring", name: 'Soaring Index'},
+    { id: "boyden", name: 'Boyden Index'},
+    { id: "vt", name: 'Vertical Totals'},
+    { id: "ct", name: 'Cross Totals'},
+    { id: "mji", name: 'Modified Jefferson Index'},
+    { id: "rackliff", name: 'Rackliff Index'},
+    { id: "thompson", name: 'Thompson Index'},
+    { id: "showalter", name: 'Showalter Index'},
+    { id: "modified-k", name: 'Modified K Index'},
+    { id: "modified-tt", name: 'Modified Totals Totals'},
+    { id: "cii", name: 'Convective Instability Index'},
+    { id: "fsi", name: 'Fog Stability Index'},
+    { id: "dci", name: 'Deep Convective Index'},
+    { id: "ko", name: 'Ko Index'},
+    { id: "pii", name: 'Potential Instability Index'},
+    { id: "hi", name: 'Humidity Index'},
+    { id: "inflow-bottom", name: "Inflow Bottom (m)"},
+    { id: "inflow-top", name: "Inflow Top (m)"},
+    { id: "shear-1", name: 'Bulk Shear 0-1 km (kt)'},
+    { id: "shear-3", name: 'Bulk Shear 0-3 km (kt)'},
+    { id: "shear-6", name: 'Bulk Shear 0-6 km (kt)'},
+    { id: "shear-8", name: 'Bulk Shear 0-8 km (kt)'},
+    { id: "shear-inflow", name: 'Bulk Shear Inflow (kt)'},
+    { id: "bunkers-r", name: 'Bunkers STM (R) (kt)'},
+    { id: "bunkers-l", name: 'Bunkers STM (L) (kt)'},
+    { id: "sreh-1", name: 'SReH (0-1 km) (m^2/s^2)'},
+    { id: "sreh-3", name: 'SReH (0-3 km) (m^2/s^2)'},
+    { id: "sreh-inflow", name: 'SReH (Inflow) (m^2/s^2)'},
+    { id: "ehi-1", name: 'Energy Helicity Index 0-1km'},
+    { id: "ehi-3", name: 'Energy Helicity Index 0-3km'},
+    { id: "ehi-inflow", name: 'Energy Helicity Index Inflow'},
+    { id: "sweat", name: 'SWEAT Index'},
+    { id: "scp", name: 'SCP'},
+  ];
 
   constructor(sounding: data.Sounding) {
     this.sounding = sounding;
@@ -38,191 +83,6 @@ export class IndexTable {
       this.update();
     });
 
-    const fnTemp = (p: number) => this.sounding.getValueAt(p, 'temp');
-    const fnDewp = (p: number) => this.sounding.getValueAt(p, 'dewpt');
-    const fnSpd = (p: number) => this.sounding.getValueAt(p, 'windspd');
-    const fnDir = (p: number) => this.sounding.getValueAt(p, 'winddir');
-    const fnHeight = (p: number) => this.sounding.getValueAt(p, 'height');
-    const fnWind = (h: number) => this.sounding.getWindAt(h);
-    const pBegin = () => this.sounding.first().pressure;
-    const pEnd = () => this.sounding.last().pressure;
-    const zBegin = () => this.sounding.first().height;
-    const zEnd = () => this.sounding.last().height;
-
-    fnTemp;fnDewp;fnSpd;fnDir;fnHeight;pBegin;pEnd;zBegin;zEnd;
-
-    let CAPE: number = NaN;
-    let CIN: number = NaN;
-    let LFC: number = NaN;
-    let EL: number = NaN;
-
-    let inflow: [number, number] = [NaN, NaN];
-
-    let MU: number = NaN;
-    let MUCAPE: number = NaN;
-    let MUCIN: number = NaN;
-
-    this.indices = [
-      {func: () => {
-        [CAPE, CIN, LFC, EL] = numerical.computeCAPE(fnTemp, fnDewp, pBegin(), pEnd());
-        return CAPE;
-      }, name: "SFC CAPE"},
-
-      {func: () => CIN,
-        name: "SFC CIN"},
-
-      {func: () => Math.sqrt(2 * CAPE),
-        name: "SFC Maximum updraft (m/s)"},
-
-      {func: () => sounding.getValueAt(LFC, 'height'),
-        name: "SFC LFC (m)" },
-
-      {func: () => sounding.getValueAt(EL, 'height'),
-        name: "SFC EL (m)"},
-  
-      {func: () => numerical.computeLiftedIndex(fnTemp, fnDewp, pBegin()),
-        name: "SFC Lifted Index"},
-
-      {func: () => {return MU = numerical.computeMostUnstable(fnTemp, fnDewp, pBegin(), 500)},
-        name: "Most unstable parcel (mb)"},
-
-      {func: () => {
-        [MUCAPE, MUCIN] = numerical.computeCAPE(fnTemp, fnDewp, MU, pEnd()).slice(0, 2);
-        return MUCAPE;
-      }, name: "MU CAPE"},
-
-      {func: () => MUCIN,
-        name: "MU CIN"},
-  
-      {func: () => numerical.computeLiftedIndex(fnTemp, fnDewp, MU),
-        name: "MU Lifted Index"},
-
-      {func: () => numerical.computePW(fnDewp, pBegin(), pEnd()),
-        name: "Precipitable Water"},
-  
-      {func: () => numerical.computeK(fnTemp, fnDewp), 
-        name: "K Index"},
-  
-      {func: () => numerical.computeTT(fnTemp, fnDewp), 
-        name: "Totals Totals"},
-
-      {func: () => numerical.computeSoaring(fnTemp, fnDewp), 
-        name: "Soaring Index"},
-  
-      {func: () => numerical.computeBoyden(fnTemp, fnHeight), 
-        name: "Boyden Index"},
-  
-      {func: () => numerical.computeVT(fnTemp), 
-        name: "Vertical Totals"},
-  
-      {func: () => numerical.computeCT(fnTemp, fnDewp), 
-        name: "Cross Totals"},
-  
-      {func: () => numerical.computeMJI(fnTemp, fnDewp), 
-        name: "Modified Jefferson Index"},
-  
-      {func: () => numerical.computeRackliff(fnTemp, fnDewp), 
-        name: "Rackliff Index"},
-  
-      {func: () => numerical.computeThompson(fnTemp, fnDewp, pBegin()), 
-        name: "Thompson Index"},
-  
-      {func: () => numerical.computeShowalter(fnTemp, fnDewp), 
-        name: "Showalter Index"},
-  
-      {func: () => numerical.computeModifiedK(fnTemp, fnDewp, pBegin()), 
-        name: "Modified K Index"},
-  
-      {func: () => numerical.computeModifiedTT(fnTemp, fnDewp, pBegin()), 
-        name: "Modified Totals Totals"},
-  
-      {func: () => numerical.computeCII(fnTemp, fnDewp, pBegin()), 
-        name: "Convective Instability Index"},
-  
-      {func: () => numerical.computeFSI(fnTemp, fnDewp, fnSpd, pBegin()), 
-        name: "Fog Stability Index"},
-  
-      {func: () => numerical.computeDCI(fnTemp, fnDewp, pBegin()), 
-        name: "Deep Convective Index"},
-  
-      {func: () => numerical.computeKo(fnTemp, fnDewp), 
-        name: "Ko Index"},
-  
-      {func: () => numerical.computePII(fnTemp, fnDewp, fnHeight), 
-        name: "Potential Instability Index"},
-  
-      {func: () => numerical.computeHumidityIndex(fnTemp, fnDewp), 
-        name: "Humidity Index"},
-  
-      {func: () => numerical.computeShear(fnWind, zBegin(), zBegin() + 1000) / 1.852,
-        name: "Bulk Shear 0-1 km (kt)"},
-
-      {func: () => numerical.computeShear(fnWind, zBegin(), zBegin() + 3000) / 1.852,
-        name: "Bulk Shear 0-3 km (kt)"},
-
-      {func: () => numerical.computeShear(fnWind, zBegin(), zBegin() + 6000) / 1.852,
-        name: "Bulk Shear 0-6 km (kt)"},
-
-      {func: () => numerical.computeShear(fnWind, zBegin(), zBegin() + 8000) / 1.852,
-        name: "Bulk Shear 0-8 km (kt)"},
-
-      {func: () => {
-        let inflowLayer: [number, number]|undefined = undefined;
-        /* Find the longest effective inflow layer */
-        let lastThickness = 0;
-        numerical.computeEffectiveInflow(fnTemp, fnDewp, pBegin(), pEnd()).forEach(
-          (layer) => {
-            const [bottom, top] = layer;
-            const thickness = numerical.hypsometricEquation(bottom, top, fnTemp, fnDewp);
-            if (thickness > lastThickness) {
-              inflowLayer = layer;
-              lastThickness = thickness;
-            }
-          }
-        );
-
-        /* Get start and end altitudes of the longest inflow layer */
-        inflow = [sounding.getValueAt(inflowLayer![0], 'height'), 
-                  sounding.getValueAt(inflowLayer![1], 'height')];
-
-        /* Compute shear of inflow layer */
-        return numerical.computeShear(fnWind, inflow[0], inflow[1]) / 1.852;
-      }, name: "Bulk Shear Inflow (kt)"},
-
-      {func: () => numerical.computeSTM(fnWind, zBegin(), 1)[0] / 1.852,
-        name: "Bunkers STM (R) (kt)"},
-
-      {func: () => numerical.computeSTM(fnWind, zBegin(), -1)[0] / 1.852,
-        name: "Bunkers STM (L) (kt)"},
-
-      {func: () => numerical.computeSREH(fnWind, zBegin(), zBegin() + 1000),
-        name: "SReH (0-1 km) (m^2/s^2)"},
-
-      {func: () => numerical.computeSREH(fnWind, zBegin(), zBegin() + 3000),
-        name: "SReH (0-3 km) (m^2/s^2)"},
-
-      {func: () => numerical.computeSREH(fnWind, inflow![0], inflow![1] + 3000),
-          name: "SReH (Inflow) (m^2/s^2)"},
-
-      {func: () => numerical.computeEHI(fnHeight, fnTemp, fnDewp, fnWind, pBegin(), pEnd(), 1000),
-        name: "Energy Helicity Index 0-1km"},
-
-      {func: () => numerical.computeEHI(fnHeight, fnTemp, fnDewp, fnWind, pBegin(), pEnd(), 3000),
-        name: "Energy Helicity Index 0-3km"},
-
-      {func: () => numerical.computeEHI(fnHeight, fnTemp, fnDewp, fnWind, pBegin(), pEnd(), inflow![1]),
-        name: "Energy Helicity Index Inflow"},
-
-      {func: () => numerical.computeSWEAT(fnTemp, fnDewp, fnSpd, fnDir),
-        name: "SWEAT Index"},
-
-      {func: () => numerical.computeSCP(fnWind, inflow![0], inflow![1], MUCAPE),
-        name: "SCP"},
-    ];
-  }
-
-  /* Computes and prints indices */
-  printIndices() {
     const indicesDiv = document.getElementById('sounding-indices-body')!;
     indicesDiv.replaceChildren();
 
@@ -232,8 +92,9 @@ export class IndexTable {
       name.className = "sounding-indices-name-column";
 
       const value = document.createElement("div");
-      try { value.innerText = index.func(this.sounding).toFixed(2); } 
-      catch { value.innerText = "Undefined"; }
+      value.id = 'index-' + index.id;
+      value.textContent = '...';
+
       value.className = "sounding-indices-value-column";
 
       const row = document.createElement("div");
@@ -242,6 +103,41 @@ export class IndexTable {
       row.appendChild(value);
       indicesDiv.appendChild(row);
     }
+  }
+
+  /* Computes and prints indices */
+  printIndices() {
+    let workerInitialized = false;
+    let index = 0;
+
+    this.worker && this.worker.terminate();
+    this.worker = new Worker('./indices-worker.js', { type: "module" });
+
+    const send = () => {
+      document.getElementById('index-' + this.indices[index].id)!.textContent += '...';
+      this.worker.postMessage(index);
+      index++;
+    }
+
+    const receive = (value: number) => {
+      const element = document.getElementById('index-' + this.indices[index - 1].id)!;
+      element.textContent = value.toFixed(2);
+    }
+
+    this.worker.onmessage = (e) => {
+      if (e.data == 'initialized') {
+        workerInitialized = true;
+        send();
+      } 
+      else if (workerInitialized) {
+        receive(e.data);
+        if (index < this.indices.length) {
+          send();
+        }
+      }
+    }
+
+    this.worker.postMessage(JSON.stringify(this.sounding));
   }
 
   update() {

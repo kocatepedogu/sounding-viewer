@@ -324,3 +324,12 @@ export class Sounding implements Iterable<Level> {
     return newLevel;
   }
 }
+
+/** Sounding and Level classes are available in workers. */
+if (typeof window === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (<any>self).sounding = {
+    Sounding: Sounding,
+    Level: Level,
+  };
+}

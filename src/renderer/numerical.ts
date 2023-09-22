@@ -770,3 +770,85 @@ export function computeSCP(fWind: VectorAccessor, zBegin: number, zEnd: number, 
 
   return (MUCAPE / 1000) * (effectiveSREH / 50) * shearTerm;
 }
+
+/**
+ * Longest inflow level (heights)
+ */
+export function computeInflowLayer(fT: ValueAccessor, fTd: ValueAccessor, fZ: ValueAccessor, pBegin: number, pEnd: number) {
+  let inflowLayer = undefined;
+  let lastThickness = 0;
+
+  computeEffectiveInflow(fT, fTd, pBegin, pEnd).forEach(
+    (layer) => {
+      const [bottom, top] = layer;
+      const thickness = hypsometricEquation(bottom, top, fT, fTd);
+      if (thickness > lastThickness) {
+        inflowLayer = layer;
+        lastThickness = thickness;
+      }
+    }
+  );
+
+  return [fZ(inflowLayer![0]), fZ(inflowLayer![1])];
+}
+
+/** All functions in this file are available in workers */
+if (typeof window === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (<any>self).numerical = {
+    windDirection,
+    windSpeed,
+    windVector,
+    vaporPressure,
+    saturatedVaporPressure,
+    mixingRatioFromVaporPressure,
+    mixingRatio,
+    saturatedMixingRatio,
+    relativeHumidity,
+    dewpointTemperature,
+    specificHumidityFromMixingRatio,
+    specificHumidity,
+    virtualTemperature,
+    potentialTemperature,
+    equivalentPotentialTemperature,
+    wetBulbTemperature,
+    liftedCondensationLevelTemp,
+    liftedCondensationLevel,
+    hypsometricEquation,
+    moistAdiabaticLapseRate,
+    liftSaturatedParcel,
+    liftDryParcel,
+    liftParcel,
+    computeCAPE,
+    computeLiftedIndex,
+    computeK,
+    computeSoaring,
+    computeTT,
+    computeBoyden,
+    computeVT,
+    computeCT,
+    computeMJI,
+    computeRackliff,
+    computeThompson,
+    computeShowalter,
+    computeModifiedK,
+    computeModifiedTT,
+    computeCII,
+    computeFSI,
+    computeDCI,
+    computeKo,
+    computePII,
+    computeHumidityIndex,
+    computeShear,
+    computeMeanWind,
+    computeSTM,
+    computeSREH,
+    computeEHI,
+    computeSWEAT,
+    computeEffectiveInflow,
+    computePW,
+    computeMostUnstable,
+    computeSCP,
+    computeInflowLayer
+  };
+}
