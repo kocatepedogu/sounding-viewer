@@ -165,13 +165,18 @@ export class SoundingTable {
     dataRow.appendChild(windCell);
 
     const windArrow = document.createElement('object');
+    windArrow.id = level.id.toString() + '-arrow-object';
     windArrow.data = '../../resources/arrow.svg';
     windArrow.width = '16px';
     windArrow.height = '16px';
-    windArrow.style.transform = `rotate(${(-90 + level.winddir) % 360}deg)`
+    windArrow.style.transform = this.getArrowTransform(level.winddir);
     windCell.appendChild(windArrow);
 
     return dataRow;
+  }
+
+  private getArrowTransform(direction: number) {
+    return `rotate(${(-90 + direction) % 360}deg)`;
   }
 
   private tableLeftClickHandler(event: MouseEvent) {
@@ -199,9 +204,10 @@ export class SoundingTable {
     // Create a text box in the cell.
     const textbox = document.createElement('input');
     textbox.id = 'sounding-table-edit';
-    textbox.type = 'text';
+    textbox.type = 'number';
+    textbox.step = 'any';
     textbox.value = this.sounding.find(targetLevel)[targetParameter].toString();
-    textbox.size = (targetElement.textContent || '').length;
+    textbox.size = 5;
     targetElement.replaceChildren(textbox);
     this.lastEdited = targetElement;
     
@@ -211,6 +217,8 @@ export class SoundingTable {
     inputbox.addEventListener('input', () => {
       const newValue = parseFloat(inputbox.value);
       this.sounding.changeAttribute(targetLevel, targetParameter, newValue);
+      const windArrow = document.getElementById(targetLevel.toString() + '-arrow-object')!;
+      windArrow.style.transform = this.getArrowTransform(this.sounding.find(targetLevel).winddir);
     });
 
     // Close the text box when user presses the enter key.

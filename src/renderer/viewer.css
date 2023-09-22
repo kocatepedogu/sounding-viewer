@@ -112,7 +112,7 @@ html, body {
   accent-color: gray;
 }
 
-#sounding-table input[type=text] {
+#sounding-table input[type=number] {
   display: inline-flex;
   position:relative;
 }
