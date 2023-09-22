@@ -1,6 +1,6 @@
 # Sounding Viewer
 
-An simple sounding visualization tool that can edit sounding data.
+A simple sounding visualization tool that can edit sounding data.
 
 <img src="./resources/app.png" width="800px">
 
