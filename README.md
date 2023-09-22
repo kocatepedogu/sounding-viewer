@@ -1,16 +1,47 @@
 # Sounding Viewer
 
-An open source sounding viewer and editor. The application provides a simple interface to download and plot GFS soundings from rucsoundings.noaa.gov and nomads.ncep.noaa.gov. It prints data as a table, draws Skew-T log-P diagrams, and shows computed instability indices.
+An easy-to-use sounding visualization tool that allows editing values.
 
-<img src="./resources/map.png" align="left" width="300">
-<img src="./resources/app.png" width="300">
+<img src="./resources/app.png" width="800px">
 
 ## Features
-+ All values in the sounding table are modifiable. Changes are immediately reflected in the diagram and in the indices panel.
-+ It is possible to exclude any particular pressure level from the sounding. The lowest included level is used as the surface level for computing parcel temperatures and indices such as CAPE and Lifted Index.
-+ Pressure levels in the table can be deleted, or new pressure levels can be created. When a new pressure level is added, its values are determined by linear interpolation or linear extrapolation, but these values can also be modified by the user.
-+ Skewness and temperature limits of the Skew-T diagram can be changed.
-+ It is possible to select which curves and functions are going to be drawn.
++ Provides a simple interface to choose coordinates, model run and hour for obtaining GFS data from rucsoundings.noaa.gov and nomads.ncep.noaa.gov.
++ Imports and exports files in GSL format
++ Sounding data can be modified through the table panel, and changes are immediately reflected in the diagram and in the indices panel.
++ It is possible to insert new levels, and delete existing levels.
++ Pressure levels can be temporarily excluded from index calculations and plots.
++ Detailed moisture information for all levels, including interpolated levels.
++ Skewness and temperature limits of the Skew-T log-P diagram are automatically determined, but they are customizable.
++ Wet bulb temperature and virtual temperature lines
++ Hodograph
++ Instability indices
+
+## Indices
+
++ CAPE, CIN, LFC, EL and Lifted Index (both surface based and most unstable parcel based)
++ Precipitable Water
++ K Index, Modified K Index
++ Totals Totals, Modified Totals Totals
++ Soaring Index
++ Boyden Index
++ Vertical Totals, Cross Totals
++ Modified Jefferson Index
++ Rackliff Index
++ Thompson Index
++ Showalter Index
++ Convective Instability Index
++ Fog Stability Index
++ Deep Convective Index
++ KO Index
++ Potential Instability Index
++ Humidity Index
++ Bottom and top altitudes of the deepest effective inflow layer
++ Bulk shear for 0-1km, 0-3km, 0-6km, 0-8km and effective inflow layer
++ Bunkers Storm Motion speed for right moving and left moving supercells
++ Storm Relative Helicity for 0-1km, 0-3km and effective inflow layer
++ Energy Helicity Index for 0-1km, 0-3km and effective inflow layer
++ SWEAT Index
++ Supercell Composite Parameter
 
 ## Dependencies
 
@@ -28,7 +59,9 @@ Most common distributions have wgrib2 package in their repositories. If you use 
 
 For Windows and Debian-based Linux distributions, binary installers can be found under releases.
 
-**Compiling from source**
+## Building from source ##
+
+Node is needed.
 
 To build and start the application:
 ```console
@@ -43,3 +76,18 @@ npm install
 npm run build
 npm run make
 ```
+
+## LICENSE
+
+Sounding Viewer is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Sounding Viewer is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along
+with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.

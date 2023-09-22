@@ -34,6 +34,7 @@ function createWindow () {
   });
 
   const win = new BrowserWindow({
+    //icon: path.join(__dirname, '../../resources/icon64.ico'),
     autoHideMenuBar: true,
     width: 1024,
     height: 720,

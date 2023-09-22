@@ -2,8 +2,8 @@
   "name": "sounding-viewer",
   "version": "1.0.0",
   "main": "./src/main/bundle.js",
-  "authors": "Dogu",
-  "description": "Computes instability indices and plots diagrams from sounding data",
+  "authors": "Dogu Kocatepe",
+  "description": "Skew-T log-P diagram, hodograph and instability indices",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@electron-forge/cli": "^6.4.2",

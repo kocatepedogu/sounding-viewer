@@ -207,7 +207,8 @@ export class SoundingTable {
     textbox.type = 'number';
     textbox.step = 'any';
     textbox.value = this.sounding.find(targetLevel)[targetParameter].toString();
-    textbox.size = 5;
+    //textbox.size = 4;
+    textbox.style.width = '50px';
     targetElement.replaceChildren(textbox);
     this.lastEdited = targetElement;
     
