@@ -93,6 +93,10 @@ onmessage = function(e) {
     postMessage('initialized');
   }
   else {
-    postMessage(functions[e.data]());
+    try {
+      postMessage(functions[e.data]());
+    } catch (err) {
+      postMessage(NaN);
+    }
   }
 };
