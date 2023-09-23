@@ -18,6 +18,7 @@
  * with Sounding Viewer. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { app } from 'electron';
 import { exec } from 'child_process';
 import fs = require('fs');
 import path = require('path');
@@ -120,11 +121,27 @@ export function downloadFromHTTPS(url: string, filename: string) {
  * @returns Parsed data as a multidimensional array
  */
 export function wgrib2(gribfile: string) {
+  const wgribPath = (()=>{
+    let p = '';
+    switch (process.platform) {
+      case 'win32': p = 'wgrib2/windows/bin/wgrib2.exe'; break;
+      case 'linux': p = 'wgrib2/linux/bin/wgrib2'; break;
+    }
+    
+    const fullPath = path.join(app.getAppPath(), p);
+    console.log(fullPath);
+    if (fs.existsSync(fullPath)) {
+      return fullPath;
+    }
+
+    return 'wgrib2';
+  })();
+
   const csvFilename = `${path.join(appDataDir, gribfile)}.csv`;
   const gribFilename = `${path.join(appDataDir, gribfile)}`;
 
   return new Promise<string[][]|Error>((resolve) => {
-    exec(`wgrib2 -csv ${csvFilename} ${gribFilename}`, (err) => {
+    exec(`${wgribPath} -csv ${csvFilename} ${gribFilename}`, (err) => {
       fs.unlinkSync(gribFilename);
 
       if (err) {
