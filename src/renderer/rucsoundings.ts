@@ -47,6 +47,10 @@ export async function fetchGFS(params: URLSearchParams) {
   const result = await fetch(fetchURL);
   const text = await result.text();
 
+  if (text == '') {
+    throw new Error('rucsoundings server did not return any data for given hour and location');
+  }
+
   return GSD.parse(text);
 }
 

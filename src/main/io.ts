@@ -60,7 +60,7 @@ export function initializeAppData() {
 
   appDataDir = path.join(appDataDir, 'sounding-viewer');
   if (!fs.existsSync(appDataDir)) {
-    fs.mkdirSync(appDataDir);
+    fs.mkdirSync(appDataDir, { recursive: true });
   }
 }
 
@@ -124,17 +124,21 @@ export function wgrib2(gribfile: string) {
   const gribFilename = `${path.join(appDataDir, gribfile)}`;
 
   return new Promise<string[][]|Error>((resolve) => {
-    exec(`wgrib2 -csv ${csvFilename} ` + gribFilename, (err) => {
+    exec(`wgrib2 -csv ${csvFilename} ${gribFilename}`, (err) => {
+      fs.unlinkSync(gribFilename);
+
       if (err) {
-        Promise.resolve(new Error('wgrib2 returned an error'));
+        return resolve(new Error('wgrib2 returned an error'));
       }
 
       fs.readFile(`${csvFilename}`, 'utf8', (err, data:string) => {
-        if (err) {
-          resolve(new Error('An error occured while reading the CSV file produced by wgrib2'));
-        }
+        fs.unlinkSync(csvFilename);
 
-        resolve(data.split('\n')
+        if (err) {
+          return resolve(new Error('An error occured while reading the CSV file produced by wgrib2'));
+        }
+  
+        return resolve(data.split('\n')
                     .map((e: string) => e.split(',')
                                          .slice(2)
                                          .map(str => str.replaceAll('"',''))));
