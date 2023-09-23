@@ -45,23 +45,15 @@ A simple sounding visualization tool that can edit sounding data.
 
 ## Dependencies
 
-No external dependencies are required for soundings obtained from rucsoundings.noaa.gov, but the data is relatively limited. In order to parse GRIB2 files obtained from nomads.ncep.noaa.gov, [wgrib2](https://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/) is required.
-
-**On Windows**
-
-The wgrib2 binaries together with necessary Cygwin DLLs are provided at the wgrib2 website: [https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/](https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/) Download all files at the link into the same directory, and add that directory to the environment variable PATH before installing Sounding Viewer.
-
-**On Linux**
-
-Most common distributions have wgrib2 package in their repositories. If you use a distribution that does not provide wgrib2 binaries, it can be easily compiled from [source](https://www.ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/) by simply running 'make'. No configuration is needed. The binary is produced in the subdirectory wgrib2. Adding that directory to PATH is sufficient.
+[wgrib2](https://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/) is required for parsing GRIB2 files from NOMADS server. Binaries are included in the release packages for [Windows](https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/Windows10/v3.0.2/) and [Linux](https://sourceforge.net/projects/opengrads/files/wgrib2/0.1.9.4/). It can be compiled from [source](https://www.ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/) if you use another OS. 
 
 ## Installing
 
-For Windows and Debian-based Linux distributions, binary installers can be found under releases.
+For Windows 10/11 (amd64) and Linux (amd64), binaries can be found under releases. No installation is needed. Extract the zip file and run sounding-viewer.
 
 ## Building from source ##
 
-Node is needed.
+Node.js (14.x or above) is needed. Clone the git repository and open a terminal/command prompt in the root directory.
 
 To build and start the application:
 ```console
@@ -70,12 +62,20 @@ npm run build
 npm run start
 ```
 
-To create a binary installer:
+To create a binary package
 ```console
-npm install
-npm run build
-npm run make
+npm run package
 ```
+
+## Terms of Use
+
+There are no restrictions on how you use the software as long as you redistribute it under GNU GPL version 3 (or later). However, please read the terms of use of rucsoundings.noaa.gov and nomads.ncep.noaa.gov. The software does not make any attempts to prevent you from doing anything that violates their terms of use. If you do excessive requests, you may get blocked from using the server. **Always wait (at least) 10 seconds before loading a new sounding.** You can save soundings as text files and later import them if you need to be able switch between different soundings frequently.
+
+From rucsoundings.noaa.gov
+> "We reserve the right to deny access to any individual or organization that we determine is abusing this service. Examples of abuse include automated transfers resulting in excessive data requests (because it hinders others from accessing the service) and attempting to gain access to documents and host machines not intended for public use."
+
+From NOMADS Grib Filter Help
+>Using parameters and looping, data acquisition may be customized and automated. If your script contains loops, then be sure to include a 10 second wait between fetches to protect against runaway loops and ensure responsible sharing of the server resources. Without waits between fetches, the server may mistake excessive requests as denial-of-service attack and block the user. 
 
 ## LICENSE
 
