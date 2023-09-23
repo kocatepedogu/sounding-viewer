@@ -1,6 +1,6 @@
 {
   "name": "sounding-viewer",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "./src/main/bundle.js",
   "authors": "Dogu Kocatepe",
   "description": "Skew-T log-P diagram, hodograph and instability indices",

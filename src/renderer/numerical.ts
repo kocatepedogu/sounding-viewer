@@ -789,7 +789,11 @@ export function computeInflowLayer(fT: ValueAccessor, fTd: ValueAccessor, fZ: Va
     }
   );
 
-  return [fZ(inflowLayer![0]), fZ(inflowLayer![1])];
+  if (inflowLayer === undefined) {
+    return undefined;
+  } else {
+    return [fZ(inflowLayer[0]), fZ(inflowLayer[1])];
+  }
 }
 
 /** All functions in this file are available in workers */
