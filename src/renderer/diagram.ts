@@ -363,7 +363,7 @@ export class SoundingPlot {
 
         this.ctx.font = "8px";
         this.ctx.fillStyle = "black";
-        this.ctx.fillText(level.pressure!.toString(), this.plotX - 30, y);
+        this.ctx.fillText(level.pressure!.toFixed(0), this.plotX - 30, y);
       }
     }
   }
